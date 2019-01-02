@@ -1,0 +1,56 @@
+# Site/SEO settings
+email: bert.vandenbroucke@gmail.com
+baseurl: "https://bwvdnbro.github.io"
+paginate: 12
+paginate_path: "/page/:num"
+permalink: /:year/:month/:day/:title/
+google_analytics: 
+
+name: Bert Vandenbroucke
+title: Astronomy, Computing and other stuff
+description: >
+  My personal blog about things I think about in 2019.
+url: http://bwvdnbro.github.io
+twitter_username: drvandenbroucke
+default_img: /assets/images/seo.jpg
+social:
+  - name: github
+    url: https://github.com/bwvdnbro
+  - name: facebook
+    url: https://www.facebook.com/bert.vandenbroucke
+  - name: skype
+    url: skype:bert.vandenbroucke
+  - name: twitter
+    url: https://twitter.com/@drvandenbroucke
+  - name: linkedin
+    url: https://linkedin.com/in/bert-vandenbroucke
+
+# Contact settings
+contact_img: /assets/images/contact.jpg
+formcarry: https://formcarry.com/s/PaxlMtRJFH8
+
+# Disqus settings
+disqus: test-apkdzgmqhj
+
+# Author settings
+author:
+  - name: Bert Vandenbroucke
+    bio: Professional astronomer.
+    url: http://bwvdnbro.github.io
+
+# Build settings
+markdown: kramdown
+plugins:
+  - jekyll-paginate
+  - jekyll-sitemap
+compress_html:
+  clippings: all
+  comments: all
+  startings: [html, head, body]
+exclude:
+  - node_modules
+  - Gemfile
+  - Gemfile.lock
+  - gulpfile.js
+  - package.json
+  - README.md
