@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Astronomy, Computing and other stuff</title>
+    <description>My personal blog about things I think about in 2019.
+</description>
+    <link>https://bwvdnbro.github.iohttp://bwvdnbro.github.io</link>
+    <atom:link href="http://bwvdnbro.github.iohttps://bwvdnbro.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Wed, 02 Jan 2019 18:16:33 +0100</pubDate>
+    <lastBuildDate>Wed, 02 Jan 2019 18:16:33 +0100</lastBuildDate>
+    <generator>Jekyll v3.6.3</generator>
+    
+  </channel>
+</rss>
