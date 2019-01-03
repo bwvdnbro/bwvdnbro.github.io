@@ -10,7 +10,7 @@ name: Bert Vandenbroucke
 title: Astronomy, Computing and other stuff
 description: >
   My personal blog about things I think about in 2019.
-url: http://bwvdnbro.github.io
+url: https://bertvandenbroucke.netlify.com
 twitter_username: drvandenbroucke
 default_img: /assets/images/seo.jpg
 social:
@@ -36,7 +36,7 @@ disqus: test-apkdzgmqhj
 author:
   - name: Bert Vandenbroucke
     bio: Professional astronomer.
-    url: http://bwvdnbro.github.io
+    url: https://bertvandenbroucke.netlify.com
 
 # Build settings
 markdown: kramdown
