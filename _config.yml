@@ -1,6 +1,6 @@
 # Site/SEO settings
 email: bert.vandenbroucke@gmail.com
-baseurl: "https://bertvandenbroucke.netlify.com"
+baseurl: ""
 paginate: 12
 paginate_path: "/page/:num"
 permalink: /:year/:month/:day/:title/
