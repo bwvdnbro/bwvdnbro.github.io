@@ -6,7 +6,8 @@
       </figure>
     {% endif %}
     <div>
-      <h2 class="posts__text"><strong itemprop="name">{{ post.title }}</strong> — <span itemprop="description">{{ post.content | strip_html | truncatewords: 35, "" }}</span></h2>
+      {% assign words = post.content | number_of_words %}
+      <h2 class="posts__text"><strong itemprop="name">{{ post.title }}</strong> — <span itemprop="description">{{ post.content | strip_html | truncatewords: 35, "" }}{% if words > 35 %}...{% endif %}</span></h2>
     </div>
   </a>
 </article>

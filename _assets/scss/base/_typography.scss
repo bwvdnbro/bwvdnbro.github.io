@@ -90,19 +90,7 @@ p {
 //---------------------------------------------- 
 q,
 blockquote {
-  @extend %text-center;
-
-  margin: 0 0 1.5rem;
-
-  font-family: $font-post;
-  font-weight: 400;
-  font-size: 1.25em;
-  color: $color-black;
-  line-height: 1.4;
-
-  @media (min-width: $mq-small) {
-    font-size: 1.5em;
-  }
+  background-color: $color-grey;
 }
 
 cite {

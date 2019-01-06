@@ -7,7 +7,7 @@ permalink: /:year/:month/:day/:title/
 google_analytics: 
 
 name: Bert Vandenbroucke
-title: Astronomy, Computing and other stuff
+title: Bert's blog
 description: >
   My personal blog about things I think about in 2019.
 url: https://bertvandenbroucke.netlify.com
