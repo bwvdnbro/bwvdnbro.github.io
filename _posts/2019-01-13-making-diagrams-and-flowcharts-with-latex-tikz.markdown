@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Making diagrams and flowcharts with LaTeX: TikZ"
-date: 2019-01-08
+date: 2019-01-13
 description: A short introduction to TikZ, a LaTeX package to generate high quality scalable diagrams and flowcharts.
 image: /assets/images/tikz.png
 author: Bert Vandenbroucke
