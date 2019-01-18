@@ -173,7 +173,7 @@ node (in the TikZ internal length units). `{This is a node}` is the
 image. This text is rendered with LaTeX, and can contain any allowed 
 LaTeX command (including additional `tikzpicture` environments!). It 
 inherits the text properties (font, font size...) of the document. By 
-default, the text is centered within the node; the node automatically 
+default, the text is centred within the node; the node automatically 
 adjusts its size to fit the caption.
 
 Except for the `\node` command, all other instructions are optional; by 
@@ -204,7 +204,7 @@ Finally, you can also create nodes as part of other commands:
 \draw (0.0, 0.0) --node[fill=green]{$A$} (1.0, 1.0);
 ```
 
-This will automatically center the node on the line drawn by the `\draw` 
+This will automatically centre the node on the line drawn by the `\draw` 
 command:
 
 ![a line with a label](/assets/images/tikz_ex3.png)
@@ -234,7 +234,7 @@ for the node connections:
 > nodes. There are other tools (e.g. 
 > [Graphviz](https://www.graphviz.org/)] that can do this for you. On 
 > Linux systems, there is a utility tool called `dot2tex` that can convert 
-> a Graphviz `.dot`-file into a propely positioned TikZ flowchart:
+> a Graphviz `.dot`-file into a properly positioned TikZ flowchart:
 > ```
 > dot2tex -f tikz -t raw --figonly <input .dot file> > <output .tex file>
 > ```
@@ -296,7 +296,7 @@ generates a contour and then colours the inside of that contour,
 is an alternative for `\fill` that uses a gradient fill.
  * you can generate specific shapes by passing keywords to `\draw` (or 
 `\fill(draw)`): `\draw (0.0, 0.0) circle (0.5);` for example creates a 
-circle centered on `(0.0, 0.0)` with radius `0.5`. There are also 
+circle centred on `(0.0, 0.0)` with radius `0.5`. There are also 
 commands for rectangles, arcs, ellipses, parabolas, sine waves... So it 
 is worth checking if your specific shape already exists before starting 
 to define it line by line.
