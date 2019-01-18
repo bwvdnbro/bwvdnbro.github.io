@@ -285,8 +285,75 @@ key, things are a little bit more complicated. The reason for this are
 the twists in the Hilbert curve which require a rotation when going from 
 one level to the next. Which means that the level 2 part of the Hilbert 
 key can only be computed if you know what the level 1 part of the key 
-is... Fortunately, we only require one level of extra knowledge compared 
-to the Morton curve; the rotation required for a given level only 
-depends on the level above.
+is... Generally, the computation for the level $$L$$ key will depend on 
+what happened on all high levels (with lower values of $$L$$).
 
-There are a few ways we could go about this...
+We could go through an awful lot of bitwise geometry to derive bitwise 
+operations per level that would allow us to generate the Hilbert key in 
+a similar fashion to the Morton key, i.e. by looping over the levels and 
+performing some bitwise magic on each of the levels to arrive at the 
+right key bit for that level. We would then need to either rotate the 
+key or rotate the integer coordinates from one level to the next, which 
+involves even more bitwise geometry. This is a very painful and slow 
+process (and I know, because I've actually done it), and I will not go 
+through it here.
+
+We could also rethink the way we compute the keys. This is the method 
+adopted by [Jin & Mellor-Crummey 
+(2005)](https://doi.org/10.1145/1055531.1055537), the paper I eventually 
+discovered during my space-filling curve exploration. Their idea is to 
+use a lookup-table to compute keys for space-filling curves. The 
+lookup-table acts as a sort of map, that tells you in which direction to 
+move along the curve, starting from a given position. The easiest way to 
+explain it is by using the Morton key as an example.
+
+Let's start again with the level 1 Morton curve. Instead of just drawing 
+it however, we will now label the connections in the curve with the 
+directions we need to move in to follow the curve between the different 
+points, and we will label the points with the shape of the curve on the 
+next level down (an inverse Z, since this will also be the Morton 
+curve):
+
+![Morton curve with directional labels](/assets/images/morton_labels.png)
+
+The entire curve can be described in terms of a simple map with the 
+1-bit integer coordinates as reference points:
+ * if the current integer position is $$(0,0)$$, move *right*
+ * if the current integer position is $$(1,0)$$, move *up and left*
+ * if the current integer position is $$(0,1)$$, move *right*
+ * if the current integer position is $$(1,1)$$, *stop*
+
+We can also add directions for the next level to this map. These are 
+very simple, since we know that the Morton curve looks the same on each 
+level. But this will be useful for the Hilbert curve. The entire map can 
+then be summarized as a simple table:
+
+| map name | position 0 | position 1 | position 2 | position 3 |
+| :---: | :---: | :---: | :---: | :---: |
+| Z | (Z, $$\rightarrow{}$$, 00) | (Z, $$\nwarrow{}$$, 01) | (Z, $$\rightarrow{}$$, 10) | (Z, stop, 11) |
+
+The different elements in each column are respectively the name of the 
+map on the next level, the movement direction for the next point on the 
+current level, and the bit that needs to be added to the Morton key on 
+that level.
+
+To construct the multi-level key for a given set of coordinates, we 
+again strip their bits from high to low, but now we use these bits to 
+look up the corresponding row in the map table. This immediately tells 
+us what part we need to add to the key, and which map to use for the 
+next level. Of course, this does not make much sense for a map this 
+simple. Note that we also don't use the directions for this.
+
+Things are a bit different for the Hilbert curve, because there are 4 
+possible orientations of our curve that we can encounter, and hence 4 
+different maps (there are actually 8, but for a given Hilbert curve we 
+only need half of them because of geometrical reasons):
+
+![Hilbert curve with directional labels](/assets/images/hilbert_labels.png)
+
+| map name | position 0 | position 1 | position 2 | position 3 |
+| :---: | :---: | :---: | :---: | :---: |
+| Z | (Z, $$\rightarrow{}$$, 00) | (Z, $$\nwarrow{}$$, 01) | (Z, $$\rightarrow{}$$, 10) | (Z, stop, 11) |
+| Z | (Z, $$\rightarrow{}$$, 00) | (Z, $$\nwarrow{}$$, 01) | (Z, $$\rightarrow{}$$, 10) | (Z, stop, 11) |
+| Z | (Z, $$\rightarrow{}$$, 00) | (Z, $$\nwarrow{}$$, 01) | (Z, $$\rightarrow{}$$, 10) | (Z, stop, 11) |
+| Z | (Z, $$\rightarrow{}$$, 00) | (Z, $$\nwarrow{}$$, 01) | (Z, $$\rightarrow{}$$, 10) | (Z, stop, 11) |
