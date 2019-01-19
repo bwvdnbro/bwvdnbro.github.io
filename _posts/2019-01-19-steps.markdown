@@ -1,0 +1,44 @@
+---
+layout: post
+title: "Steps (working title)"
+date: 2019-01-19
+description: to be written
+image: /assets/images/space_filling_curves.png
+author: Bert Vandenbroucke
+tags: 
+  - Scientific computing
+  - Workflow management
+---
+
+During the past few years, I have conducted or been involved with quite 
+a few astrophysical simulation projects. Despite being very different in 
+subject (some of these simulations involved single stars, while others 
+covered entire galaxies), I noticed these projects always roughly 
+followed the same steps. Some of these steps were very obvious, while I 
+only became aware of others after a few projects.
+
+Generally, the steps you follow to complete some task are what we call a 
+*workflow*. Basically everyone that does something is executing some 
+workflow, but most people are not aware of that fact. And while being 
+aware of your workflow does not necessarily make the workflow any easier 
+to execute, it sometimes helps to improve it, or to make it more 
+efficient.
+
+Below I will try to give an overview of my typical workflow during an 
+astrophysical simulation project. Workflows are usually very specific to 
+a certain task and maybe even to a certain person, so I cannot promise 
+that this workflow will be of any help. But then again, you never 
+know...
+
+# Step 1: design/study phase
+
+Every project starts with an idea. This idea does not have to be your 
+own (in fact, if you are an early career researcher, it usually isn't). 
+The idea is a very vague plan for something to do, and can be based on 
+various things: a discussion with a fellow scientist, a paper you 
+recently read, or just something you came up with in the shower that 
+morning.
+
+In this first step, you need to make this vague plan more concrete. And 
+the best way to do this is by digging into the library, or, more 
+correctly, into some online search engine.
