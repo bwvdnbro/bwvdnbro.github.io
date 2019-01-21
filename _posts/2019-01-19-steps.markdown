@@ -41,4 +41,57 @@ morning.
 
 In this first step, you need to make this vague plan more concrete. And 
 the best way to do this is by digging into the library, or, more 
-correctly, into some online search engine.
+correctly, into some online search engine. There are two things you will 
+be looking for: papers or presentations from people that have done 
+something that sounds or looks similar to what you have in mind, and 
+maybe more importantly, papers or presentations that show what you plan 
+to do is impossible or much harder than you think it is. You need to get 
+an idea of what people have already done in this area, and if possible, 
+how they did it.
+
+Although this step is the most obvious step, I have to admit it is not 
+my favourite, and I usually don't spend enough time on this. I prefer to 
+skip ahead to the next step as soon as possible...
+
+# Step 2: development phase
+
+Once you know more concretely what you want to do, you can actually 
+start doing it. Depending on what your more concrete plan turned out to 
+be, setting up the components you need for you specific simulations 
+might involve a lot or very little work, so this step can vary a lot in 
+length.
+
+During the development phase, you should make *all* the important 
+implementation changes that are required in your algorithm or code so 
+that you can actually run the simulations you want to run. It is very 
+important to take your time for this; any bug you create now might haunt 
+you later in the project. Also try to resist the temptation of already 
+running production simulations with only part of the changes in place; 
+even if you suspect your later changes will not affect these 
+simulations, this can create version conflicts that might very well mean 
+you have to rerun these simulations later anyway.
+
+What you should do is run a lot of *dedicated* tests. If your change 
+should have effect A, you should have a specific, inexpensive test that 
+shows you indeed get effect A, and not effect B. Or that your effect A 
+does not result in an unwanted side-effect C. Don't trust your instincts 
+too much on this one; even if you think your change to the code cannot 
+possibly be wrong, it is still worth testing. Your change might be 
+perfectly fine, but it could still trigger a bug somewhere else that 
+never caused problems before, or might have a larger impact on the run 
+time or memory footprint of your simulation than you expected. A change 
+is only successful and ready for production runs if you can actually 
+convince yourself that it works based on simulation output.
+
+Note that the time you spend on the development phase is usually not 
+proportional to its scientific impact and that is very easy to feel 
+unproductive during this phase. But if your algorithmic changes are 
+well-implemented, you might benefit a lot from them later.
+
+# Step 3: prototype phase
+
+This step can sometimes be seen as part of the development phase, 
+although I think it is useful to make a distinction between the two. In 
+the prototype phase, you need to show that your plan will actually work. 
+You have designed the plan, made all the necessary changes, so now it is 
+time to actually start working
