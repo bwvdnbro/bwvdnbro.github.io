@@ -49,6 +49,11 @@ to do is impossible or much harder than you think it is. You need to get
 an idea of what people have already done in this area, and if possible, 
 how they did it.
 
+Based on that information, you can then start working out a more 
+detailed plan of what you are going to do. What will you try to 
+simulate? What questions do you hope to answer? What is needed to do the 
+simulations (in terms of both hardware and software)?
+
 Although this step is the most obvious step, I have to admit it is not 
 my favourite, and I usually don't spend enough time on this. I prefer to 
 skip ahead to the next step as soon as possible...
@@ -83,10 +88,18 @@ time or memory footprint of your simulation than you expected. A change
 is only successful and ready for production runs if you can actually 
 convince yourself that it works based on simulation output.
 
+If dedicated tests are not possible, you should try to find reference 
+results that you can compare with. If someone else already did similar 
+simulations, you can try to run something similar to what they did and 
+see if you find similar effects. This type of testing is less rigorous, 
+but might still tell you when something is clearly wrong in your 
+implementation.
+
 Note that the time you spend on the development phase is usually not 
 proportional to its scientific impact and that is very easy to feel 
 unproductive during this phase. But if your algorithmic changes are 
-well-implemented, you might benefit a lot from them later.
+well-implemented, you might benefit a lot from them later. Moreover, I 
+personally enjoy this phase the most.
 
 # Step 3: prototype phase
 
@@ -94,4 +107,81 @@ This step can sometimes be seen as part of the development phase,
 although I think it is useful to make a distinction between the two. In 
 the prototype phase, you need to show that your plan will actually work. 
 You have designed the plan, made all the necessary changes, so now it is 
-time to actually start working
+time to actually show that your new simulations can be done by running 
+something very similar to what you actually want to simulate.
+
+The difference between these prototypes and the tests mentioned as part 
+of the development phase is their size: tests should be small and easy 
+to run, while prototypes should be very similar in complexity to what 
+you actually want to do for your production runs. There are two main 
+targets for this phase. You first of all need to check that your code 
+also works in production, i.e. that it can handle the size and the 
+environment of the production runs. This means that you might very well 
+discover additional bugs or issues that might force you to fall back to 
+the development phase. Secondly, the prototype phase allows you to get a 
+feeling for the *parameters* of the run, i.e. typical sizes, time 
+scales, physical input values that lead to interesting results.
+
+Depending on the outcome of the design and study phase, you might or 
+might not have an idea of what sensible parameter values would be. In 
+case you don't, there are several ways to proceed. First of all try to 
+find some estimates for the sizes and physical conditions you are likely 
+to find, based on what you find in literature. If you can't find 
+specific values, you are still very likely to find upper and/or lower 
+limits. Combined with some physical intuition, this gives you a good 
+idea of the likely parameter value range.
+
+Time scales are usually harder to obtain from literature (most 
+astronomical phenomena happen on very long time scales and can hence not 
+readily be observed). But they can usually be estimated from typical 
+velocities, accelerations and length scales, so look for those. Most 
+software that deals with time integration has some sort of time step 
+criterion built in, so sometimes simply setting of a simulation and 
+looking at those can give you a good idea of what the dynamical time 
+scale of your system is. Simulations that only take of the order of 10 
+time steps are usually not that very interesting...
+
+Finding an appropriate numerical resolution is both straightforward and 
+difficult. Theoretically, the optimal resolution is the resolution at 
+which convergence is reached, i.e. the results *of interest* do no 
+longer change if you increase the resolution. Usually this resolution is 
+hard to achieve as (a) quantities of interest are rarely known in the 
+prototype phase, and very often are the quantities for which convergence 
+is doubtful, (b) numerical resolution is often limited by hardware, i.e. 
+how much available memory or CPU power you have or how long your are 
+willing to wait for your simulation results. Prototypes can again give 
+you useful input to determine good values for these, but a proper 
+convergence study should also be part of your production runs.
+
+At the end of the prototype phase, you should be ready for production 
+phase. This means that you should know exactly which simulations you 
+want to run, know how long they will approximately run, and are 
+confident that they will run without crashing.
+
+# Step 4: production phase
+
+The production phase is the phase where you actually do the research you 
+want to do with the simulations. Based on the prototype phase, you 
+should have one or more *reference* models that use parameter values 
+that lead to interesting and physically plausible results. Usually you now
+want to run a few categories of simulations:
+ * convergence simulations: simulations with reference values for the 
+physical parameters in which you vary the parameters that control the 
+numerical resolution of your simulation. The aim of these is to 
+demonstrate, in a rigorous scientific way, that your results are 
+physical solutions of your model equations and that they can be trusted.
+ * parameter studies: simulations with a (near) optimal resolution in 
+which you systematically vary the values of physical parameters. The aim 
+of these is to quantify the impact physical changes have on your 
+results. These simulations usually cover the scientifically relevant
+content of your research.
+ * model studies: simulations with small variations of the physical 
+model, like additional physical ingredients or a different way of 
+computing a physical ingredient. Note that these model variations should 
+have been covered by the development and prototype phases and that these 
+simulations are only useful if you limit the amount of changes.
+ * algorithm studies: simulations with small variations in the algorithm 
+or with different values for algorithmic parameters. These are usually 
+only relevant if you developed the new algorithm. Variations in 
+algorithmic parameters for existing algorithms can be classified as 
+convergence simulations.
