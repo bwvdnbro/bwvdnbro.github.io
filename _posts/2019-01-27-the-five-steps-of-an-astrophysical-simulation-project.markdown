@@ -3,7 +3,7 @@ layout: post
 title: "The five steps of an astrophysical simulation project"
 date: 2019-01-27
 description: An overview of my general workflow during an astrophysical simulation project
-image: /assets/images/space_filling_curves.png
+image: /assets/images/steps.png
 author: Bert Vandenbroucke
 tags: 
   - Scientific computing
@@ -283,15 +283,16 @@ phase. Things become more problematic when you need to go back to the
 development phase, as the changes you make there might affect the 
 existing production simulations. I think it is acceptable to not do this 
 for very expensive simulations, and limit your changes to anything that 
-does not interfere with existing production simulatoins. If your paper 
+does not interfere with existing production simulations. If your paper 
 does not crucially depend on going back to the development phase, you 
 can probably argue as such in your comments to the reviewer.
 
 In any case, the review phase poses a bit of a problem for the general 
 workflow I have outlined here, as it does not fit in well with the five 
-other steps. This makes it even more important to be very critical about 
-the work in the development and prototype phase yourself, so that you 
-minimize the chance of a reviewer forcing you to revise these.
+other steps (this is also why this post only mentions five steps in its 
+title). This makes it even more important to be very critical about the 
+work in the development and prototype phase yourself, so that you 
+minimise the chance of a reviewer forcing you to revise these.
 
 # General remarks
 
