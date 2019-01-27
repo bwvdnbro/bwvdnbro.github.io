@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "Steps (working title)"
-date: 2019-01-19
-description: to be written
+title: "The five steps of an astrophysical simulation project"
+date: 2019-01-27
+description: An overview of my general workflow during an astrophysical simulation project
 image: /assets/images/space_filling_curves.png
 author: Bert Vandenbroucke
 tags: 
@@ -95,6 +95,18 @@ see if you find similar effects. This type of testing is less rigorous,
 but might still tell you when something is clearly wrong in your 
 implementation.
 
+Apart from algorithmic changes, this is also the phase in which you 
+should start thinking about useful output. Usually numerical simulations 
+produce *snapshots*, i.e. dumps of the properties of the simulation at a 
+fixed time. Depending on the size of the simulation, these snapshots can 
+be quite large and you are hence limited in the amount of snapshots you 
+can reasonably produce; a low snapshot frequency however means that you 
+loose quite a lot of time resolution. Sometimes it is more useful to 
+limit the output to some specific quantities (either for a subset of the 
+available data or as a simulation average) but output these more 
+frequently. This will require additional code that needs to be tested 
+before you can use it in production simulations.
+
 Note that the time you spend on the development phase is usually not 
 proportional to its scientific impact and that is very easy to feel 
 unproductive during this phase. But if your algorithmic changes are 
@@ -153,6 +165,13 @@ willing to wait for your simulation results. Prototypes can again give
 you useful input to determine good values for these, but a proper 
 convergence study should also be part of your production runs.
 
+The output of the prototype simulations is also invaluable for the 
+development of your analysis pipeline. It provides you with 
+representative snapshots and other output files that will have the same 
+type of content and a similar size to your production simulations. This 
+means that you can use it to test your analysis scripts before the 
+actual production runs have finished.
+
 At the end of the prototype phase, you should be ready for production 
 phase. This means that you should know exactly which simulations you 
 want to run, know how long they will approximately run, and are 
@@ -179,9 +198,126 @@ content of your research.
 model, like additional physical ingredients or a different way of 
 computing a physical ingredient. Note that these model variations should 
 have been covered by the development and prototype phases and that these 
-simulations are only useful if you limit the amount of changes.
+simulations can only be usefully interpreted if you limit the amount of 
+changes.
  * algorithm studies: simulations with small variations in the algorithm 
 or with different values for algorithmic parameters. These are usually 
 only relevant if you developed the new algorithm. Variations in 
 algorithmic parameters for existing algorithms can be classified as 
-convergence simulations.
+convergence simulations, since then their only use is showing that you 
+are using sensible values.
+
+The production phase is usually not very labour intensive, but can take 
+quite a lot of time, depending on the computational complexity of the 
+simulations. This makes it a rather frustrating part of the usual 
+simulation workflow, as it forces you to sit around and wait. You can of 
+course (and you probably should) regularly check the status of your 
+simulations. If your output is stored on an unsafe hard disk (i.e. a 
+hard disk that is not automatically backed up on a regular basis), you 
+should make sure that preliminary output data is backed up. It is 
+important to be very methodical in this phase, to make sure you don't 
+forget to monitor some of your simulations, and to avoid mixing up the 
+output from various runs. I would therefore strongly recommend using a 
+workflow management tool to manage your simulations (see a future post).
+
+As mentioned above, there is also some work you can do while you wait: 
+the development of a dedicated analysis pipeline. Of course, it is hard 
+to predict exactly what analysis will be interesting to highlight the 
+yet unknown results of your simulations, but you usually have some idea 
+of what you want to analyse, so you can already start developing some of 
+the necessary analysis scripts. The output of the prototype simulations 
+should be very helpful in this process, as it provides you with data 
+that has the same layout and should cover a very similar range of 
+values. And it is also a good idea to apply your analysis pipeline to 
+the early results of your production simulations, to monitor their 
+progress (and catch problems early).
+
+Ideally, the production phase ends when all your simulations finish 
+without problems. It is however very likely that things will go wrong: a 
+simulation might still crash because of unknown reasons, or it might 
+turn out that some of your parameter values were not that interesting at 
+all. So even in this phase, you might still be forced to adjust your 
+parameter ranges, or worse, fall back to the development and prototype 
+phase. Once you are forced to go back to previous phases, you will 
+create inconsistencies between production runs that have already 
+finished and new production runs, so things will get a bit messy. It is 
+therefore good to try to avoid this scenario. This is why it is very 
+important to spend enough time on tests during the development phase, 
+and why you should see the prototype phase as a separate phase.
+
+# Step 5: analysis phase
+
+Once your production runs have finished (or when a sufficient fraction 
+has finished), you can start analysing the results. This phase is very 
+problem dependent, but usually involves making plots of quantities using 
+some scripting language (I strongly recommend Python). These plots can 
+show individual quantities for one snapshot of a simulation, or can 
+track quantities or average quantities over time by analysing multiple 
+snapshot (or by using dedicated simulation output with a higher output 
+frequency).
+
+Again, it is very important in this phase to be methodical, so that you 
+don't mix up results from different simulations or different times. Also 
+think about which analyses are computationally expensive and which ones 
+can be redone very easily; it might be worth to save some of the 
+analysis output rather than rerunning the full analysis every time you 
+change a plot.
+
+During the analysis phase, you can also start writing up your results in 
+a scientific publication. Usually, this will inspire you to perform 
+additional analyses, so the two go hand in hand. Or a co-author on this 
+publication will suggest additional analyses (they should not suggest 
+additional simulations; this should be done in the prototype phase).
+
+At the end of this phase, you should be able to submit your scientific 
+paper containing the results and findings of the project.
+
+# Step 6: review phase
+
+Scientific papers need to be peer-reviewed before they are published, 
+and during this process additional issues might be raised. This might 
+force you to go back to the analysis phase. Or worse. In principle, 
+there is nothing wrong with running additional simulations to cover 
+additional physical parameters and hence going back to the production 
+phase. Things become more problematic when you need to go back to the 
+development phase, as the changes you make there might affect the 
+existing production simulations. I think it is acceptable to not do this 
+for very expensive simulations, and limit your changes to anything that 
+does not interfere with existing production simulatoins. If your paper 
+does not crucially depend on going back to the development phase, you 
+can probably argue as such in your comments to the reviewer.
+
+In any case, the review phase poses a bit of a problem for the general 
+workflow I have outlined here, as it does not fit in well with the five 
+other steps. This makes it even more important to be very critical about 
+the work in the development and prototype phase yourself, so that you 
+minimize the chance of a reviewer forcing you to revise these.
+
+# General remarks
+
+The workflow outlined here is more of an ideal scenario than a real 
+workflow; I have to admit none of my projects ever exactly stuck to it. 
+It does however contain some important pieces of wisdom that I think are 
+useful to keep in mind. There are a few things in particular:
+ * Be very aware of the difference between development tests, and 
+production simulations. Development tests are just that: tests you run 
+for yourself during development. If you plan to include those in your 
+paper, you should include them in your prototype and production phase 
+and make sure you have a good, reproducible way of running them. There 
+is a difference between convincing yourself something works and 
+convincing other people, and running the tests with a very specific 
+version of the software that only worked during a brief moment during 
+the development does not mean your code actually passes the test.
+ * Also be aware of the difference between prototypes and production 
+simulations. It is acceptable to include a successful prototype 
+simulation in your production runs, but only if it fits within the range 
+of parameters you want to explore in production. A prototype allows you 
+a lot of freedom to change around things, which you shouldn't allow in 
+your production simulations.
+ * Be aware of the existence of the prototype phase and use it wisely. 
+This is a good phase to plan the details of your production simulations 
+and set up a rigid workflow that will allow you to execute the 
+production phase very efficiently and systematically. It also provides 
+you with all the information you need to start outlining the project 
+paper and to develop your analysis pipeline. This is useful, as this is 
+the only thing you can do while you wait for your simulations to finish.
