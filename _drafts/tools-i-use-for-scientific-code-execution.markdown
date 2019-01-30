@@ -274,9 +274,86 @@ more.
 
 ## batch systems
 
-Batch systems are very similar to the shells introduced above, 
+Batch systems are very similar to the shells introduced above, except 
+that you don't usually use them interactively. Batch systems are 
+inherently part of shared computing facilities, where you have to use 
+them. A batch system shell script is referred to as a *job script*. You 
+need to *submit* this job script to the batch system (using an 
+appropriate command) and this will then put your job in a shared *queue* 
+that contains all the jobs of all the other people that want to run 
+commands on the facility. The batch system will then *schedule* your job 
+on (a part of) the machine when there are sufficient resources 
+available. Depending on how many jobs are in the queue, this can take a 
+while. Most batch systems additionally assign a *priority* to each job 
+that is scheduled, with higher priority jobs getting preference over low 
+priority jobs. These priorities can depend on many factors, and usually 
+funding is one of them (someone has to pay for the facility).
+
+Unfortunately, there are many batch systems, and it is not up to you to 
+pick one; the choice of batch system depends on the shared computing 
+facility. Most batch systems have very similar features however, and 
+they all use an underlying shell to actually execute your job. Knowing 
+shell commands hence also pays off in this case. And knowing one batch 
+system is usually enough to be able to use another one, if you can get a 
+hold of the documentation for the system-specific feature syntax, that 
+is.
+
+Figuring out which batch system you are using can be tricky. In my 
+experience, small facilities (especially computing nodes owned by 
+university departments of research groups) don't bother documenting 
+their system very well. In this case, it helps to try locate 
+system-specific commands. The table below can be useful:
+
+| commands | likely batch system |
+| --- | --- |
+| `sbatch`, `sinfo`, `squeue`, `scancel` | [Slurm Workload Manager](https://slurm.schedmd.com/) |
+| `qsub`, `qstat`, `qdel` | [Portable Batch System](https://www.pbspro.org/) or [TORQUE](http://www.adaptivecomputing.com/products/torque/) |
+
+If you can find these commands on the login shell of the remote 
+facility, you can be quite confident that they are using the 
+corresponding batch system.
+
+Independent of the batch system, each system offers commands to submit 
+(`sbatch`, `qsub`), monitor (`sinfo` and `squeue`, `qstat`) and cancel 
+(`scancel`, `qdel`) jobs.
+
+A batch script (job script) is very similar to a normal shell script, 
+except for some batch system directives at the start. Below is an 
+example script for the Slurm sytem:
+
+```
+#! /bin/bash
+#
+#SBATCH --job-name=test
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=32
+#SBATCH --output=test.out
+#SBATCH --error=test.err
+
+echo "Hello expensive computing facility!"
+```
+
+The lines starting with `#SBATCH` contain directives for the Slurm 
+system, e.g. the name of the job that will be used in status reports, 
+the number of computing nodes to use, the number of threads to use per 
+computing node, and the names of the files in which the standard output 
+and standard error output will be stored (this is the output you would 
+normally see in the command line terminal if you were to execute the 
+script in a shell). Most other batch systems have similar directives 
+(but with different names). For the PBS and TORQUE systems, directive 
+lines start with `#PBS` instead of `#SBATCH`.
+
+Using a batch system can seem a bit intimidating at first, but once you 
+realise it is just a somewhat more complicated shell, it is actually not 
+that difficult. It is quite normal that things go wrong when you submit 
+a script for the first time, and knowing how to interpret error output 
+and to get information about how the script was executed can help a lot. 
+Just make sure that you test your script properly before submitting 100 
+jobs using the same script!
 
 # Performance tools
+
+The tools below are similar to the automation tools 
 
 ## Python multiprocessing
 
