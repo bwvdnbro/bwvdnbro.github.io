@@ -319,7 +319,7 @@ Independent of the batch system, each system offers commands to submit
 
 A batch script (job script) is very similar to a normal shell script, 
 except for some batch system directives at the start. Below is an 
-example script for the Slurm sytem:
+example script for the Slurm system:
 
 ```
 #! /bin/bash
@@ -576,4 +576,62 @@ a block that has the corresponding file as output and run that block
 first). The `COMMAND` specifies the actual command to run. Makeflow will 
 complain if this command does not generate all of the expected output.
 
+To run this flow using Makeflow, we need to do two things. First, we 
+need to start the WMS, using the `makeflow` command:
+
+```
+> makeflow -T wq makeflow.makeflow -p 9000
+```
+
+The `-T wq` argument specifies the batch system to use to submit jobs; 
+`wq` stands for WorkQueue, Makeflow's own batch system. `-p 9000` 
+specifies the network port that Makeflow will use to communicate with 
+WorkQueue. If you omit this argument, Makeflow will choose a random port 
+and tell you its number. You need this number for the second step.
+
+The second step is launching the batch system itself. This can be done 
+using the `work_queue_worker` command (from a new command line 
+terminal):
+
+```
+> work_queue_worker --cores 8 --memory 1000 --disk 1000 localhost 9000
+```
+
+This will launch a batch system with 8 threads (`--cores 8`). This 
+system will use a maximum of 1000 MB of RAM memory (`--memory 1000`) and 
+1000 MB of hard drive space (`--disk 1000`), and will try to contact 
+Makeflow on the `localhost` using network port `9000`. Note that the 
+system parameters do not have to match those that are actually 
+available, but that WorkQueue will fail to launch if you use values that 
+are larger than what is available. If WorkQueue has multiple threads 
+available, it will use all of these to execute Makeflow jobs. Makeflow 
+allows you to specify the computational requirements for a job in the 
+Makeflow file.
+
+If all went well, the Makeflow and WorkQueue processes will now start 
+communicating with each other, and will execute the entire workflow. If 
+something goes wrong, Makeflow will tell you about this. In this case, 
+you will be able to restart the workflow where you left it.
+
+You can also run the WorkQueue command on a remote cluster and still 
+make it communicate with your local Makeflow command. This however 
+requires appropriate network settings and is not so easy to set up. 
+Makeflow has additional features that make it possible to execute a 
+workflow using multiple WorkQueue systems on multiple clusters. This is 
+just a very brief introduction to Makeflow, so I will tell you more 
+about this in a future post.
+
 ## Other WMSs
+
+Makeflow is quite limited in terms of what it can do and the amount of 
+diagnostic output it generates. This makes it less suitable for really 
+large projects. There are many other WMSs that are much more powerful, 
+but unfortunately, I have not been able to successfully use any of 
+these. Here is a list of some of these:
+ * [Pegasus WMS](https://pegasus.isi.edu/)
+ * [Kepler](https://kepler-project.org/)
+ * [Galaxy](https://galaxyproject.org/)
+
+I would also recommend the [Blue Waters webinar series on Scientific 
+Workflow Management 
+Systems](https://bluewaters.ncsa.illinois.edu/webinars/workflows).
