@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "Tools I use for scientific code execution"
+date: 2019-02-03
 description: An overview of the tools I use during scientific code execution
 image: /assets/images/tools.jpg
 author: Bert Vandenbroucke
@@ -37,8 +38,9 @@ commands. There are various shells you can choose from, but most of them
 offer basic *scripting* functionality, i.e. they have support for 
 control structures like loops and conditions that allow you to write 
 simple *programs* (called *scripts*) that are executed by the shell. 
-Ubuntu-systems by default ship with the `bash` shell, and that is also 
-my personal favourite.
+Ubuntu-systems by default ship with the [`bash` 
+shell](https://www.gnu.org/software/bash/), and that is also my personal 
+favourite.
 
 A first level of automation can already be achieved by just using these 
 control structures as actual commands. Suppose for example that you have 
@@ -160,13 +162,13 @@ program:
 ./commands.sh
 ```
 
-Note that Unix-systems are quite specific about executing files and by 
-default set the file permissions so that this is not allowed. You can 
-manually set the permission to execute the script by running
-
-```
-chmod +x commands.sh
-```
+> Note that Unix-systems are quite specific about executing files and by 
+> default set the file permissions so that this is not allowed. You can 
+> manually set the permission to execute the script by running
+>
+> ```
+> chmod +x commands.sh
+> ```
 
 The advantage of using scripts is *reproducibility*: if you often rerun 
 the same set of commands, then having them stored saves you the effort 
@@ -243,8 +245,8 @@ enclose that command in `$()`:
 GNU/Linux
 ```
 
-Note that the `uname` command gives you information about the operating 
-system.
+> Note that the `uname` command gives you information about the 
+> operating system.
 
 Lastly, `bash` scripts automatically receive additional command line 
 arguments in special variables. The following script:
@@ -300,7 +302,7 @@ is.
 
 Figuring out which batch system you are using can be tricky. In my 
 experience, small facilities (especially computing nodes owned by 
-university departments of research groups) don't bother documenting 
+university departments or research groups) don't bother documenting 
 their system very well. In this case, it helps to try locate 
 system-specific commands. The table below can be useful:
 
@@ -356,14 +358,15 @@ jobs using the same script!
 The tools below are similar to the automation tools above, except that 
 they introduce a new introducing feature: parallelisation. All systems 
 nowadays (even your laptop) have a number (usually something like 4, 8 
-or 16) parallel threads to their disposal that can execute commands 
-simultaneously. Unfortunately, you cannot normally use these threads 
-manually from the command line; the responsibility for using the 
-parallel environment correctly is left to the individual programs you 
-use. If your program does not support using multiple threads, it will 
-just run on a single thread, and you will be wasting a large fraction of 
-your available resources. The tools discussed below can help you exploit 
-the additional available computing power.
+or 16) cores to their disposal that can execute commands simultaneously. 
+Unfortunately, you cannot normally use these cores manually from the 
+command line; the responsibility for using the parallel environment 
+correctly is left to the individual programs you use. If your program 
+does not support using multiple threads (a *thread* is a single active 
+core, or the equivalent of a single serial program), it will just run on 
+a single core, and you will be wasting a large fraction of your 
+available resources. The tools discussed below can help you exploit the 
+additional available computing power.
 
 ## Python multiprocessing
 
@@ -379,12 +382,13 @@ available threads efficiently.
 Despite being useful, I recently stopped using this option in favour of 
 the solution I will introduce next. The main reason is that parallel 
 Python scripts usually have complex dependencies, which makes it harder 
-to use them in workflows (see below). On top of that, it is quite tricky 
-to interrupt parallel Python scripts; just killing the Python script 
-does not properly close all the threads and leads to ghost Python 
-processes still running in the background. I'm sure parallel processing 
-within Python can be useful for some applications, but for the purposes 
-I usually use Python (simulation analysis), it is not ideal.
+to use them in workflows ([see below](#workflow-management)). On top of 
+that, it is quite tricky to interrupt parallel Python scripts; just 
+killing the Python script does not properly close all the threads and 
+leads to ghost Python processes still running in the background. I'm 
+sure parallel processing within Python can be useful for some 
+applications, but for the purposes I usually use Python (simulation 
+analysis), it is not ideal.
 
 ## GNU parallel
 
@@ -501,16 +505,17 @@ Workflow Management Systems (or WMSs) offer a more complete solution to
 automating and optimising your tasks. They do however require an 
 additional step of abstraction, which we call a *workflow*.
 
-I already briefly mentioned workflows in a PREVIOUS POST. In essence, a 
-workflow is a structured representation of the commands you need to run 
-in order to execute a task that details the *dependencies* between these 
-commands: required input and output files, and software and hardware 
-requirements. This representation is usually visualised as a flowchart, 
-and allows you to see the order in which commands need to be run, and 
-which files need to be present in order for a command to work. It also 
-shows you which parts of your task get invalidated if a file changes, 
-i.e. they make it possible to easily figure out which commands you need 
-to rerun if a small part of your input files changed.
+I already briefly mentioned workflows in [a previous post]({% post_url 
+2019-01-27-the-five-steps-of-an-astrophysical-simulation-project %}). In 
+essence, a workflow is a structured representation of the commands you 
+need to run in order to execute a task that details the *dependencies* 
+between these commands: required input and output files, and software 
+and hardware requirements. This representation is usually visualised as 
+a flowchart, and allows you to see the order in which commands need to 
+be run, and which files need to be present in order for a command to 
+work. It also shows you which parts of your task get invalidated if a 
+file changes, i.e. they make it possible to easily figure out which 
+commands you need to rerun if a small part of your input files changed.
 
 Workflows are incredibly powerful, and I should probably discuss them in 
 more detail in a future post. For now, I will limit myself to the 
@@ -533,8 +538,8 @@ consistently on a number of different machines). It consists of the WMS
 itself, `makeflow`, and an additional batch system, `workqueue`, that is 
 responsible for executing `makeflow` jobs efficiently (similar to a 
 traditional batch system). `makeflow` can also be used in conjunction 
-with existing batch systems, like the one discussed ABOVE, and with a 
-standard shell.
+with existing batch systems, like the ones discussed 
+[above](#batch-systems), and with a standard shell.
 
 I will explain the usage of `makeflow` in more detail in a future post 
 and limit myself to a very basic example. Suppose we have a single input 
