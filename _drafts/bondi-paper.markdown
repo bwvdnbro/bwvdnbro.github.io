@@ -142,3 +142,43 @@ publication) deals with a theoretical detail of the spherically
 symmetric case, that I will describe in more detail below.
 
 # Steady-state accretion
+
+The accretion onto a massive protostar is a highly dynamic event: gas at 
+large distances is pulled in by the gravitational attraction of the 
+protostar and accelerates towards the protostar. The gas is hence 
+constantly moving. Nevertheless, we can write down a mathematical 
+description for this event that does not change over time. To do this, 
+we have to make three assumptions: (1) that we have an infinite 
+reservoir of gas with a constant density at large distances from the 
+accreting protostar, (2) that the properties of the protostar (like its 
+mass) do not change when gas is accreted onto it, and (3) that the 
+accretion *rate* onto the protostar is constant in time and space. To 
+understand the latter, picture a large sphere surrounding the protostar. 
+The radius of the sphere should be large enough so that it comfortably 
+fits the entire protostar and its immediate surroundings. We will assume 
+that the radius of the sphere does not change over time. While gas is 
+being accreted, it will cross the surface of the large sphere. We can 
+count how much gas crosses the surface during some time interval 
+$$\Delta{}t$$, and call this $$\Delta{}M$$. The accretion rate is then 
+defined as
+
+$$\dot{M} = \frac{\Delta{}M}{\Delta{}t}.$$
+
+Our assumption hence means that $$\dot{M}$$ is a constant number, both 
+when we track the accretion across the surface of the same large sphere 
+over time, or when we do the same for a large sphere with a different 
+radius. The assumption that the accretion of gas does not alter the mass 
+of the protostar is clearly not very realistic, but it is nevertheless a 
+good approximation if the accretion rate is low enough: if the mass of 
+the protostar is $$20~{\rm{}M}_\odot{}$$ (20 times the mass of our Sun, 
+a typical mass for a massive protostar) and the accretion rate is 
+$$\dot{M} = 10^{-5}~{\rm{}M}_\odot{}~{\rm{}yr}^{-1}$$ (meaning the star 
+accretes a mass equivalent to 0.001% of our Sun every year), then it 
+will take 20,000 years before the mass of the protostar changes by 1% of 
+its value. In that same time, the gas can cover more than 10,000 times 
+the distance between the Earth and the Sun!
+
+When we make these three assumptions, we can find a so called 
+*steady-state solution* for the dynamics of the gas. This solution is an 
+example of a *dynamic equilibrium*: it is a *stable* solution that does not
+change over time, while at the same time being 
