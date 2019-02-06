@@ -13,10 +13,11 @@ tags:
 
 Last week, a scientific paper that has been in my scientific pipeline 
 for over a year got accepted for publication in Monthly Notices of the 
-Royal Astronomical Society, and this seems a good opportunity to explain 
-what this paper is about. It also allows me to tell you some more about 
-the machinery behind the paper, which made extensive use of workflow 
-management systems.
+Royal Astronomical Society ([Vandenbroucke *et al.*, 
+2019](https://doi.org/10.1093/mnras/stz357)), and this seems a good 
+opportunity to explain what this paper is about. It also allows me to 
+tell you some more about the machinery behind the paper, which made 
+extensive use of workflow management systems.
 
 # Introduction
 
@@ -180,5 +181,72 @@ the distance between the Earth and the Sun!
 
 When we make these three assumptions, we can find a so called 
 *steady-state solution* for the dynamics of the gas. This solution is an 
-example of a *dynamic equilibrium*: it is a *stable* solution that does not
-change over time, while at the same time being 
+example of a *dynamic equilibrium*: it is a *stable* solution that does 
+not change over time, while at the same time describing gas that is 
+*moving*. The steady-state solution for *spherically symmetric* 
+accretion onto a massive object is called *Bondi accretion*, since 
+Hermann Bondi was the first one to derive this steady-state solution. 
+*Spherically symmetric* in this case means that we also assume that the 
+gas properties only change when the gas is closer or further away from 
+the star (we only allow *radial* changes), and that they are the same 
+for gas that is at a constant distance from the star.
+
+When we want to describe a trapped HII region, we need to make 
+additional assumptions about how the radiation heats the gas. Leon 
+Mestel proposed to assume a *two temperature solution* in which ionized, 
+hot gas has a constant temperature $$T_i$$, while neutral, cold gas has 
+a constant temperature $$T_n$$ (and $$T_i > T_n$$). He further assumed 
+that the transition from ionized to neutral gas (what we call an 
+*ionization front*) is very sharp and happens at a distance $$R_I$$ from 
+the star.
+
+Using these assumptions, Leon Mestel and later Eric Keto were able to 
+show that a new steady-state solution exists for small enough values of 
+$$R_I$$. However, their solution was *numerical*, which means that they 
+were able to show that the solution exists, and could write down 
+computer code that can generate the solution (e.g. to make images). In 
+this paper, we extended this work by actually deriving a mathematical 
+equation that describes the two temperature steady-state solution. The 
+equation itself is not very elegant (it involves a special function 
+called the *Lambert-W function*), but nevertheless is useful, as it 
+gives us a good way to compute the gas density and fluid velocity at any 
+arbitrary distance from the star. We will use this for our simulations 
+later on.
+
+Another issue that neither Leon Mestel nor Eric Keto discussed in their 
+original work was the *stability* of the two temperature steady-state 
+solution. Recall that steady-state means that the solution is not 
+supposed to change over time: the gas density and fluid velocity remain 
+the same at any given radius, although the gas itself is constantly 
+moving. In a perfect world (or rather, a perfect Universe), this would 
+mean that our analytic expression is valid for eternity. Unfortunately 
+however, our Universe is not perfect, and real stars will never have a 
+perfectly constant accretion rate (one of the assumptions we made 
+above). This means that we can realistically expect to have small 
+deviations from the constant accretion rate we assume, and hence small 
+changes in the two temperature steady-state solution (the solution won't 
+be *perfectly* steady-state).
+
+*Stability* deals with what happens when a steady-state solution is 
+*perturbed* by small deviations in the assumptions on which it is based. 
+There are two possible scenarios, called *unconditionally stable* and 
+*conditionally* or *marginally stable* solutions. The easiest way to 
+understand these is to think about a landscape with hills and valleys in 
+which you place a ball that is free to roll under the force of gravity. 
+When the ball is on a slope, gravity will pull it down towards the lower 
+end of the slope; this is clearly not a stable position for the ball to 
+be in. When the ball is on the top of a hill or in the bottom of a 
+valley however, the force of gravity cannot affect it, and it will 
+happily stay there; these are stable positions.
+
+When the ball is at the bottom of a valley, and for some reason it is 
+pushed out of the valley over a small distance (a small deviation from 
+its stable position), it will be pulled back towards the bottom of the 
+valley, since that is the direction of gravity. The valley is an 
+*unconditionally stable* position: the ball will always roll back to the 
+bottom of the valley (as long as it does not move too far away from it). 
+For the top of a hill position, things are very different: in this case 
+gravity pulls away from the top of the hill, and hence away from what 
+was originally a stable position. The top of a hill is a *marginally 
+stable* position: any small deviation from it inevitably leads to the 
+ball rolling away towards a more stable other position.
