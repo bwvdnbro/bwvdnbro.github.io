@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Running a development environment inside a Docker container"
-#date: 2019-02-03
+date: 2019-02-15
 description: >-
   An introduction to setting up a dedicated Docker container for hassle-free
   scientific code development.
@@ -112,7 +112,7 @@ portable saved state of the container. Images in Docker are built up in
 a hierarchical way: every image is based on a *base image* and extends 
 this image with additional features. [Docker 
 Hub](https://hub.docker.com/) hosts more than 100,000 Docker images that 
-can be used as base image, including all versions of major linux 
+can be used as base image, including all versions of major Linux 
 distributions.
 
 To build an image, you need to run the `docker build` command, and tell 
@@ -288,9 +288,9 @@ The full script is shown below:
 
 ```
 #! /bin/bash
-docker run -u bv7 -v ~/.ssh:/home/bv7/.ssh -t -i cmac_u18 bash -l
+docker run -u bv7 -v ~/.ssh:/home/bv7/.ssh -t -i cmi_u18 bash -l
 docker_id=$(docker ps --format "{{.ID}}" -l)
-docker commit $docker_id cmac_u18
+docker commit $docker_id cmi_u18
 ```
 
 The `-v` syntax for volume mounting will be explained in more detail 
@@ -338,9 +338,9 @@ wrapper script does:
 
 ```
 #! /bin/bash
-docker run -u 0 -t -i cmac_u18 bash -l
+docker run -u 0 -t -i cmi_u18 bash -l
 docker_id=$(docker ps --format "{{.ID}}" -l)
-docker commit $docker_id cmac_u18
+docker commit $docker_id cmi_u18
 ```
 
 The main difference with the normal wrapper script is the `-u 0` 
@@ -363,13 +363,13 @@ Fortunately, Docker supports data sharing, by means of *volumes*. A
 *volume* is a shared folder (or a network location or even an actual 
 volume like a USB drive) that exists on the host system, and that is 
 *mounted* in the container as if it were a folder in the container file 
-system. If the host system runs the same operatings system as the 
+system. If the host system runs the same operating system as the 
 container, then the folder is simply shared; if the file systems on host 
 and guest are different, some underlying conversions happen that can 
 cause some overhead. Volumes can be mounted in various ways; I will only 
 discuss the option I find the most user-friendly.
 
-Mounting a volume is pretty straigthforward, you just add an option to the
+Mounting a volume is pretty straightforward, you just add an option to the
 `docker run` command:
 
 ```
