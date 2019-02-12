@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Running a development environment inside a Docker container"
-date: 2019-02-15
+date: 2019-02-12
 description: >-
   An introduction to setting up a dedicated Docker container for hassle-free
   scientific code development.
