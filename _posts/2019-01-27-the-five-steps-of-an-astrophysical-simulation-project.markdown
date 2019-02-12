@@ -3,7 +3,6 @@ layout: post
 title: "The five steps of an astrophysical simulation project"
 date: 2019-01-27
 description: An overview of my general workflow during an astrophysical simulation project
-image: /assets/images/steps.png
 author: Bert Vandenbroucke
 tags: 
   - Scientific computing
