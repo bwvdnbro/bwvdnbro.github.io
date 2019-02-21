@@ -1,10 +1,11 @@
 ---
 layout: post
 title: "List of commands I frequently forget"
-#date: 2019-02-12
+date: 2019-02-21
 description: >-
   A list of Linux commands whose syntax I always forget, despite using them
   all the time.
+image: https://imgs.xkcd.com/comics/tar.png
 author: Bert Vandenbroucke
 tags: 
   - Tools
@@ -122,7 +123,7 @@ And then there are the additional options necessary to make the movie
 work on OSX...
 
 So here is the command to convert all movie frames (`snapshot0000.png` 
-to `snapshot1000.png`) into a single `.mp4` movie with a framerate of 20 
+to `snapshot1000.png`) into a single `.mp4` movie with a frame rate of 20 
 frames per second (the `\` is only there to properly break the line in a 
 shell):
 
@@ -157,9 +158,9 @@ image format, just based on extension. Or they are very complex (no
 example here, as I can't think of one of the top of my head).
 
 The command to *trim* an image is an exception. *Trimming* is the 
-operation whereby you remove whitespace surrounding an image, by 
+operation whereby you remove white space surrounding an image, by 
 shrinking the *canvas* of the image to the bit of the image that is 
-interesting. Note that whitespace does not necessarily have to be white 
+interesting. Note that white space does not necessarily have to be white 
 here. Trimming is very useful if your image has a very generous border 
 you want to get rid of (e.g. because you really want to fit this image 
 into your 1 page limited grant proposal).
@@ -182,3 +183,88 @@ or
 ```
 mogrify -trim +repage image.png
 ```
+
+# Another classic: `tar`
+
+This particular command is known to be a problem, as already illustrated 
+in the cover image for this post ([source](https://xkcd.com/1168/)):
+
+![relevant xkcd](https://imgs.xkcd.com/comics/tar.png)
+
+`tar` is a powerful combination and compression tool that can be used to 
+create uncompressed (`.tar`) and compressed (`.tar.gz` or `.tar.bz`) 
+archives containing a (usually large) number of files, in order to 
+easily transfer these files together. The problem with `tar` is that its 
+behaviour is completely dependent on the command line options you 
+provide; this is what causes much of the confusion.
+
+Suppose you have a compressed archive, `archive.tar.gz`. The following 
+command lists the contents of the archive (option `-t`) (without 
+extracting it):
+
+```
+tar -tzf archive.tar.gz
+```
+
+To extract the archive, use (option `-x`):
+
+```
+tar -xzvf archive.tar.gz
+```
+
+To create an archive from all files (and folders) in the current 
+directory, use (option `-c`):
+
+```
+tar -czvf archive.tar.gz *
+```
+
+This command has the annoying side effect that it will extract the files 
+into the current working directory when extracting the archive again 
+(`tar` never creates new folders; it can unpack folders that are part of 
+the archive). To create an archive that has a folder at its root, so 
+that it extracts into its own folder, put all the files in the folder 
+first, and then create the archive like this:
+
+```
+tar -czvf archive.tar.gz folder
+```
+
+Note that in all these commands, the `-f` option specifies the name of 
+the archive. This is why it should immediately precede the archive name 
+(the order of all other flags is arbitrary).
+
+# The last one: `find`
+
+Finding files in Linux is less straightforward than I think it should 
+be. First of all, there is the easy to use `locate`:
+
+```
+locate bit_of_filename
+```
+
+Which will present you with a list of all paths in the system that 
+contain `bit_of_filename`. There are two issues with this command:
+ 1. it literally returns results for the whole file system, so you might 
+get a lot of results that you don't need.
+ 2. since searching the whole system would be impractical, `locate` 
+depends on a database of file locations that is occasionally updated. 
+New files (which are unfortunately often the files you want to find) are 
+likely not to be in that database (yet). You can manually force a 
+database update with `sudo updatedb`, but this (a) takes a while, and 
+(b) requires root privileges.
+
+`find` provides a more powerful alternative for finding files, as you 
+can control where it looks for files. Unfortunately, its syntax is a bit
+less straightforward. To find a file in a specific folder or all subfolders,
+use
+
+```
+find folder -name "part_of_filename"
+```
+
+The folder is optional (defaults to the current working directory), the 
+`-name` bit is not: if you omit it, `find` will just print the entire 
+contents of the folder. The `-name` option accepts the regular 
+wildcards, so once you know this syntax, file finding becomes a lot 
+easier.

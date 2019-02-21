@@ -275,13 +275,13 @@ script allows normal access to the container; the second script allows
 [root access](#root-access) to the container in case this is required.
 
 The first script consists of three `docker` commands:
- - a call to `docker run` that accesses the container using the user 
+ * a call to `docker run` that accesses the container using the user 
 account we created during the image build and that mounts the local 
 `.ssh` folder so that the container shares the SSH keys and 
 configuration of the host system
- - a call to `docker ps` that recovers the hash tag of the container 
+ * a call to `docker ps` that recovers the hash tag of the container 
 when it exits
- - a call to `docker commit` that saves the final state of the container 
+ * a call to `docker commit` that saves the final state of the container 
 as an image with the same tag as the original container image
 
 The full script is shown below:
@@ -289,7 +289,7 @@ The full script is shown below:
 ```
 #! /bin/bash
 docker run -u bv7 -v ~/.ssh:/home/bv7/.ssh -t -i cmi_u18 bash -l
-docker_id=$(docker ps --format "{{.ID}}" -l)
+docker_id=$(docker ps --format "{{ "{{.ID"}}}}" -l)
 docker commit $docker_id cmi_u18
 ```
 
@@ -339,7 +339,7 @@ wrapper script does:
 ```
 #! /bin/bash
 docker run -u 0 -t -i cmi_u18 bash -l
-docker_id=$(docker ps --format "{{.ID}}" -l)
+docker_id=$(docker ps --format "{{ "{{.ID"}}}}" -l)
 docker commit $docker_id cmi_u18
 ```
 
