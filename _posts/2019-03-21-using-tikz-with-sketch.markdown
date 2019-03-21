@@ -2,7 +2,7 @@
 layout: post
 title: "Using TikZ with sketch"
 description: A brief introduction to sketch
-#date: 2019-03-10
+date: 2019-03-21
 author: Bert Vandenbroucke
 tags: 
   - LaTeX
@@ -37,7 +37,7 @@ always enough to add depth perception to your scene.
 
 Another interesting property of 3D spaces is the fact that distant 
 objects are completely or partially hidden by objects in the foreground. 
-You can mimick this property by not drawing objects that are covered by 
+You can mimic this property by not drawing objects that are covered by 
 foreground objects, or by drawing them differently, e.g. as dashed lines 
 instead of full lines. This sounds easy, but is actually pretty tricky 
 to do: you need to order all objects in the scene according to their 
@@ -45,7 +45,7 @@ distance to the *observer* (i.e. a specific point in the space that acts
 as a virtual eye that observes the scene) and then use that information 
 when you draw the objects in the scene. Most computer algorithms that do 
 this (and there are many, both in the gaming industry, design, 3D 
-rendering sector...) use a suprisingly simple approach: they order the 
+rendering sector...) use a surprisingly simple approach: they order the 
 objects in a so called *depth buffer* and then draw them one by one, 
 starting from the deepest object (furthest away). Objects that are drawn 
 later automatically cover objects that were drawn before, and hence 
@@ -205,3 +205,82 @@ observed by a virtual observer at position `eye` looking at position
 `look_at`. The scene now renders as
 
 ![rotated example scene](/assets/images/scene_rotated.png)
+
+The 3 hidden faces of the cube are now properly concealed, and the part 
+of the line passing through the cube is hidden as it should as well.
+
+Before I move on, I need to point out that the order of the vertices in 
+the `polygon` calls matters a lot for the result of this drawing. By 
+default, sketch *culls* polygons that have their surface normal oriented 
+*away* from the observer. Or in other words, it assumes that these faces 
+are not visible and removes them from the drawing. If you were to swap 
+`p010` and `p001` in the `pol0` define for example, that face would no 
+longer show up, even when it is not hidden by other faces. If you want 
+to switch off this default behaviour, you have to add an additional 
+`cull=false` argument to the `polygon` construction:
+
+```
+def pol0 polygon[cull=false](p000)(p001)(p011)(p010)
+```
+
+# Showing hidden objects
+
+The example above works, but does not contain all the information in the 
+original drawing: we can assume we see a cube, but we might just as well 
+be showing a pyramid from exactly the right angle so that it looks like 
+a cube.
+
+We can make the hidden faces show up in a different line style, so that 
+it is clear they are concealed, but so that they are still visible. To 
+do this, we need to use a trick. By default, sketch hides objects that 
+are not visible. We can switch this behaviour off by adding a 
+`[lay=over]` argument to the object. This way, the object will always be 
+drawn, even when it should be hidden. If we now draw the same object 
+twice, once in the normal style that should be used when it is visible, 
+and once in the special style that should be used when it is not, then 
+the normal style will hide the special style when the object is visible, 
+while the special style will still be visible when the normal style is 
+hidden. The relevant change to our example is
+
+```
+def dpol0 polygon[lay=over,fill style=fill=none,line style=dotted]
+  (p000)(p010)(p011)(p001)
+def dpol1 polygon[lay=over,fill style=fill=none,line style=dotted]
+  (p100)(p110)(p111)(p101)
+def dpol2 polygon[lay=over,fill style=fill=none,line style=dotted]
+  (p000)(p001)(p101)(p100)
+def dpol3 polygon[lay=over,fill style=fill=none,line style=dotted]
+  (p010)(p011)(p111)(p110)
+def dpol4 polygon[lay=over,fill style=fill=none,line style=dotted]
+  (p000)(p100)(p110)(p010)
+def dpol5 polygon[lay=over,fill style=fill=none,line style=dotted]
+  (p001)(p101)(p111)(p011)
+def pol0 polygon(p000)(p010)(p011)(p001)
+def pol1 polygon(p100)(p110)(p111)(p101)
+def pol2 polygon(p000)(p001)(p101)(p100)
+def pol3 polygon(p010)(p011)(p111)(p110)
+def pol4 polygon(p000)(p100)(p110)(p010)
+def pol5 polygon(p001)(p101)(p111)(p011)
+
+def cube0 { {dpol0}{dpol1}{dpol2}{dpol3}{dpol4}{dpol5}
+            {pol0}{pol1}{pol2}{pol3}{pol4}{pol5} }
+```
+
+The `lay=over` was already introduced above, the `fill style` and `line 
+style` attributes make sure the polygon face is transparent (only the 
+contours are drawn) and the contour lines are dotted. The example also 
+shows that sketch allows you to break up long lines. The resulting image 
+is shown below:
+
+![example with hidden lines](/assets/images/scene_dotted.png)
+
+The hidden lines are now shown and we can see we are really drawing a 
+cube.
+
+# More later
+
+The examples in this post give a very minimal overview of the 
+capabilities of sketch. In the next post, I will introduce more advanced 
+capabilities, like additional styling, text labels, colours... and show 
+you how to duplicate and move parts of the drawing to make more 
+complicated diagrams.
