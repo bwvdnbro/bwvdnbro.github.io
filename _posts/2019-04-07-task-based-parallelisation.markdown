@@ -2,7 +2,7 @@
 layout: post
 title: "Task based parallelisation"
 description: A very brief introduction to task based parallelisation.
-#date: 2019-04-05
+date: 2019-04-07
 author: Bert Vandenbroucke
 tags: 
   - Scientific Computing
@@ -57,7 +57,7 @@ While all of this was going on, memory issues also became more and more
 apparent. Early computers had a very small amount of RAM memory (which I 
 will just refer to as *memory*) and you usually had to think very 
 carefully about how to use this efficiently. When memory sizes started 
-to go up (in line with, but slower than [Moore's 
+to go up (in line with - but slower than - [Moore's 
 law](https://en.wikipedia.org/wiki/Moore%27s_law), memory usage got 
 cheaper and software started using the available memory more freely. 
 However, increasing memory sizes also led to a more complicated memory 
@@ -68,7 +68,8 @@ further away. This difference grows with increasing memory size and
 hence became more apparent. To avoid long waiting times for the CPUs, 
 fast memory caches were developed that sit close to the CPU and that can 
 be used to temporarily store variables used by the CPU. These caches are 
-small and a programmer has very little control over how they are used.
+small (the closest one to the cores has a size of just a few tens of KB) 
+and a programmer has very little control over how they are used.
 
 Both these developments lead to very strict requirements for software 
 that wants to use modern CPUs efficiently. Efficient algorithms should
@@ -97,8 +98,8 @@ context has a double meaning:
 only a small fraction of the overall computation time required by the 
 algorithm,
  2. the parts should be small in terms of memory footprint and should 
-preferably fit into a fast memory cache (with a typical size of the 
-order of MB).
+preferably fit into a fast memory cache (which means they should only 
+use a few MB at most).
 
 In addition to this, the tasks should be either *independent* (the task 
 can be executed without any interference with any other task) or should 
@@ -126,11 +127,12 @@ the size in memory of the matrix).
 
 To turn our two operations into a task based algorithm, we first need to 
 divide our matrix into a number of smaller parts. This can be done in 
-many ways, and I have already introduced some of them BEFORE. A task 
-will then constitute one of our operations (or part of it) on a single 
-part of the matrix. Provided there are enough small parts, these tasks 
-will be small in memory and constitute a small fraction of the total run 
-time, as required.
+many ways, and I have already introduced some of them [before]({% 
+post_url 2019-02-28-graph-decomposition %}). A task will then constitute 
+one of our operations (or part of it) on a single part of the matrix. 
+Provided there are enough small parts, these tasks will be small in 
+memory and constitute a small fraction of the total run time, as 
+required.
 
 The first operation also satisfies the independence criterion, as the 
 operation can be applied to any of the cells in a matrix part completely 
@@ -282,7 +284,9 @@ located on different nodes.
 This was only a short introduction to task based parallelisation in 
 which I only covered the basics. I hope to cover more specifics 
 (including distributed memory parallelisation) in future posts. For now, 
-I think it is also useful to reference THIS PAPER by some of my SWIFT 
+I think it is also useful to reference [this 
+paper](https://arxiv.org/abs/1601.05384) by some of my SWIFT 
 collaborators that gives a very good introduction of the subject, and 
-that also serves as the documentation for the QUICKSCHED library that 
-can be used for your own task based parallel algorithms.
+that also serves as the documentation for the 
+[QuickSched](https://gitlab.cosma.dur.ac.uk/swift/quicksched) library 
+that can be used for your own task based parallel algorithms.
