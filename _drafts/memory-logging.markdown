@@ -69,19 +69,16 @@ interested in knowing exactly how much memory every memory allocation in
 your program actually allocates, in which case you want to track virtual 
 memory. But if all you care about is making sure that your software will 
 fit in the available memory on some machine, then you probably care 
-about the amount of actual physical memory used by your software. 
-Unfortunately, the latter turns out to be the hardest to achieve in 
-practice.
+about the amount of actual physical memory used by your software.
 
 ## Keeping track of virtual memory
 
-So let's start with the easy one. If you want to track virtual memory, 
-then you simply need to log every allocation that is made, i.e. you make 
-a little note of how much memory is requested for every call that is 
-made to the relevant allocation routines. In a low-level language like C 
-where every allocation is done using `malloc` or an equivalent routine, 
-it is straightforware to create your own wrapper function for `malloc` 
-that achieves exactly this.
+If you want to track virtual memory, then you simply need to log every 
+allocation that is made, i.e. you make a little note of how much memory 
+is requested for every call that is made to the relevant allocation 
+routines. In a low-level language like C where every allocation is done 
+using `malloc` or an equivalent routine, it is straightforware to create 
+your own wrapper function for `malloc` that achieves exactly this.
 
 In somewhat higher level languages like C++, things are a bit more 
 complicated, as many objects are allocated indirectly through class 
@@ -189,12 +186,55 @@ used for both and works well enough for my purposes.
 
 ## Keeping track of actual memory usage
 
-As already mentioned, tracking the actual memory that is used is not 
-straigthforward at all, as this depends on the inner workings of the 
+As already mentioned, the actual memory that is used is not equal to the 
+allocated virtual memory, as this depends on the inner workings of the 
 kernel (and additional factors, e.g. how busy the system is at the 
 time). If your program is written efficiently (in terms of memory 
 allocations), then the actual memory usage and the virtual memory usage 
 should be similar. If you don't know whether your program is memory 
-efficient or not, then you will need to do something else.
+efficient or not, then you will need to do something else to figure out 
+how much memory was actually used.
 
-HMM, maybe resident size can help here?
+Again, `/proc/self/statm` provides the solution, and this time it is the 
+only good solution I know. Other methods I know are only able to tell 
+you what the maximum used physical memory was since the start of the 
+program, and while useful, this does not allow accurate tracking of the 
+real time physical memory usage. The only advantage is that these 
+methods are a bit more portable and work on other Unix systems than 
+Linux.
+
+So let's just start with the old method that I have been using for a few 
+years now:
+
+```
+#include <sys/resource.h>
+
+struct rusage resource_usage;
+getrusage(RUSAGE_SELF, &resource_usage);
+size_t memory_use = resource_usage.ru_maxrss;
+```
+
+This gives you the peak memory usage in KB. The name `rss` stands for 
+*resident set size*. While writing this post, I realised that exactly 
+the same name is given in `/proc/self/status` for a real time value, and 
+according to `man proc` (the Linux manual for the `proc` pseudo file 
+system) this is also the second value present in `/proc/self/statm`. So 
+the following code returns both the current virtual memory size and 
+current physical memory size:
+
+```
+#include <fstream>
+
+std::ifstream statm("/proc/self/statm");
+unsigned int vmem_size, phys_size;
+statm >> vmem_size >> phys_size;
+```
+
+Both are expressed in page sizes.
+
+From my explanation above, it might be obvious that it does not really 
+make sense to track physical memory usage while objects are being 
+allocated, as allocation only creates the virtual memory and not 
+necessarily physical memory. Tracking the physical memory usage over 
+time can however be very useful. I plan to implement this feature in 
+CMacIonize's `MemoryLogger` as soon as I get a chance.
