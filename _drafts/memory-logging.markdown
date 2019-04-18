@@ -35,7 +35,7 @@ system's job to make sure this memory is actually available, either as a
 real piece of memory in the *physical* memory, or in some other way.
 
 Note that this means that not every memory allocation in your program 
-will necessarily use physical memory. If you are very cautious and 
+will necessarily use physical memory. If you are very greedy and 
 allocate more memory than you need without ever using it, the operating 
 system might decide not to allocate all of this memory in the physical 
 RAM and your program might fit in less memory than you expect. But it 
@@ -63,8 +63,8 @@ next half hour (or until you manage to kill your program).
 
 # Keeping track of memory
 
-Knowing that there is not just one type of memory, it is important to 
-define what you actually mean with tracking memory. You might be 
+Once you know that there is not just one type of memory, it is important 
+to define what you actually mean with tracking memory. You might be 
 interested in knowing exactly how much memory every memory allocation in 
 your program actually allocates, in which case you want to track virtual 
 memory. But if all you care about is making sure that your software will 
@@ -101,4 +101,100 @@ compute the memory size of `std::vector`s and manually allocated memory.
 I would basically provide every *suspect* class with a `get_memory_size` 
 member function and then manually track the allocated memory whenever an 
 object of that class was created. This worked very well, but was 
-obviously a lot of work. Too much work in fact to make it worth
+obviously a lot of work. Too much work in fact to make it worth the 
+effort and use it as a sustainable solution.
+
+A second way I only recently (read: this week) stumbled upon makes use 
+of the pseudo file system that Linux distributions provide under 
+`/proc`. This is a Linux only feature that is provided by the Linux 
+kernel and provides a very powerful way for the kernel to communicate 
+with other parts of the system. The way it works is as follows: your 
+program (which runs within a unique *process* on your system) requests a 
+file (or set of files) located under the `/proc` directory. The kernel 
+catches this request and generates the corresponding file, tailored to 
+the needs of the requesting process. No actual file is ever generated, 
+but since the output of the request still takes the form of a simple 
+text file, the requesting process can parse it as it likes and get all 
+the relevant information.
+
+You can easily generate a list of all available `/proc` *files* by 
+querying the `/proc` file system:
+
+```
+ls /proc
+```
+
+This will generate a list of all currently running processes, and a list 
+of *global* information files, like `/proc/cpuinfo` which contains 
+information about the available CPUs on the system. To get information 
+for the currently running process, you can simply query `/proc/self`, in 
+which case the operating system will automatically display the contents 
+of the `/proc` subdirectory for the requesting process, without you 
+having to bother to figure out the ID of this process.
+
+`/proc/self` contains a lot of useful *files*, but for our purposes we 
+are only interested in `/proc/self/status` and `/proc/self/statm`. The 
+former contains a human readable description of the resources used by 
+the requesting process, including the current virtual memory usage 
+(`VmSize`) and the maximum virtual memory usage since the start of the 
+process (`VmPeak`). The latter is a stripped down version of this 
+information that focuses on virtual memory usage only and that is not 
+meant for human consumption. It is however ideal for our purposes.
+
+Using `/proc/self/statm`, we can get the current virtual memory usage of 
+the program using the following code:
+
+```
+#include <fstream>
+
+std::ifstream statm("/proc/self/statm");
+unsigned int vmem_size;
+statm >> vmem_size;
+```
+
+The value present in `statm` is expressed in *page sizes*, where one 
+*page size* corresponds to the size of a single *block* of memory on the 
+system. These blocks are the way the operating system uses to organise 
+the memory; it will always allocate memory in multiples of the page 
+size. The actual page size is system dependent, although a typical value 
+for it is 4096 bytes (4 KB). You can get the system page size as 
+follows:
+
+```
+#include <unistd.h>
+
+unsigned int pagesize = getpagesize();
+```
+
+Note that while the page size will probably fit in a 32-bit integer 
+variable, the total virtual memory size might not. So it is probably a 
+good idea to use 64-bit integers or `size_t` variables to manipulate 
+these values.
+
+Now that we have a way to get the *total* virtual memory size for the 
+program at any given time, it is reasonably straightforward to set up a 
+memory tracking routine: we simply determine the memory size before and 
+after a certain object is created, and assume that the difference is due 
+to the size of the object in memory. We still need to explicitly call 
+the memory tracking routine in our code, but the overhead has been 
+significantly reduced (and this immediately provides us with a good way 
+of attaching labels to the memory logs).
+
+Alternatively, we can also simply take snapshots of the total memory at 
+various points during the program, and use these to assess which 
+operations have the most significant impact on the program. The 
+`MemoryLogger` class I wrote for 
+[CMacIonize](https://github.com/bwvdnbro/CMacIonize/) this week can be 
+used for both and works well enough for my purposes.
+
+## Keeping track of actual memory usage
+
+As already mentioned, tracking the actual memory that is used is not 
+straigthforward at all, as this depends on the inner workings of the 
+kernel (and additional factors, e.g. how busy the system is at the 
+time). If your program is written efficiently (in terms of memory 
+allocations), then the actual memory usage and the virtual memory usage 
+should be similar. If you don't know whether your program is memory 
+efficient or not, then you will need to do something else.
+
+HMM, maybe resident size can help here?
