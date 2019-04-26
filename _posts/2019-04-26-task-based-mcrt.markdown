@@ -2,7 +2,7 @@
 layout: post
 title: "Task based MCRT"
 description: A brief description of my new task based MCRT method.
-#date: 2019-04-18
+date: 2019-04-26
 author: Bert Vandenbroucke
 tags: 
   - Code Development
@@ -40,7 +40,7 @@ interact with the grid during one step of the MCRT algorithm: when they
 are being propagated for an unknown distance in a random direction. 
 Generating the photon packets at the source does not require any 
 knowledge about the grid. Scattering the photon packets (this can be 
-because of direct scattering but also because of reemission at a 
+because of direct scattering but also because of re-emission at a 
 different wave length) requires some knowledge about the grid, but does 
 not generally require *access* to the grid, i.e. it does not cause 
 potential thread conflicts when done in parallel. So the only step of 
@@ -78,14 +78,20 @@ with new randomly generated photon packets at a source
 are propagated through a part of the grid. On entry, all these photon 
 packets are either within that part of the grid or entering it through 
 one of its sides. On exit, the photon packets are either absorbed (and 
-potentially scattered/reemitted) within that part of the grid or leave 
+potentially scattered/re-emitted) within that part of the grid or leave 
 the grid part through one of its sides, edges or corners (there are 4 
 sides and 4 corners for a 2D square cell and 6 sides, 12 edges and 8 
 corners for a 3D cubic cell). There are hence multiple possible output 
 buffers for a single input buffer.
  - photon packet scattering: a photon packet that was absorbed is 
-scattered or reemitted in a different direction and with potentially 
+scattered or re-emitted in a different direction and with potentially 
 different properties.
+
+The photon propagation step is illustrated below:
+
+![Schematic representation of the task based photon propagation step 
+within a distributed grid with photon packet 
+buffers](/assets/images/subgrids.png)
 
 Below I will discuss the necessary components to turn these tasks into a 
 working task based MCRT algorithm.
@@ -194,3 +200,137 @@ condition for the photon propagation step, as an empty queue for all
 threads does not necessarily mean the step is done. And it creates a 
 significant issue with memory management for the resources that are used 
 by the tasks: the tasks themselves and the photon packet buffers.
+
+The tasks themselves are very small, but still require some variables to 
+be stored: the type of task, the index of the subgrid they operate on, 
+the index of the photon buffers involved (if any) and some locking 
+mechanism to make sure only one thread can execute them. These variables 
+require memory that needs to be allocated and managed. The same is true 
+for the photon buffers; these are considerably larger in memory. I very 
+quickly discovered that allocating the task and photon buffer memory 
+when the task or photon buffer is created and deallocating it when it is 
+no longer used is very slow. Furthermore, it causes huge bottlenecks, as 
+memory allocations are almost always thread safe and hence very slow in 
+a shared memory context. To avoid this, it is possible to preallocate a 
+fixed amount of task and photon buffer memory at the start and reuse 
+this during the simulation.
+
+Managing preallocated memory requires some bookkeeping. First of all, it 
+means that instead of handling tasks and photon buffers, we will be 
+handling indices to these objects within the preallocated memory, and we 
+need to pass on the relevant memory whenever we want to access task or 
+photon buffer properties. Secondly, it means that we need to keep track 
+of which indices are already in use and which ones are free. To make 
+everything thread safe, we have to do these checks using a thread safe 
+mechanism, i.e. we can use a lock for every element in the preallocated 
+memory.
+
+All of these requirements can be met by constructing a thread safe 
+memory array as follows. First, a large block of memory is allocated 
+with a fixed size that is chosen in advance (the current implementation 
+does not allow changing the size at run time). Then, a shared memory 
+lock is created for each element in the newly allocated memory block. 
+Finally, an *atomic* index variable is created and set to point to the 
+first element in the memory block. *Atomic* means that this variable can 
+only be changed *atomically*, using low level CPU instructions that are 
+guaranteed to be thread safe. So only one thread is allowed to change 
+the value of the atomic index at any given time.
+
+Then, we define three functions to deal with the elements of the memory 
+block:
+ 1. A function that returns a free element by repeatedly (a) atomically 
+getting the old value of the index variable and incrementing it by 1, 
+this guarantees that the current thread gets a unique index, and (b) 
+trying to lock the corresponding shared memory lock, until locking the 
+element succeeds.
+ 2. A function that frees a previously obtained element by unlocking the 
+corresponding shared memory lock.
+ 3. A function that returns the element at a given index.
+
+To make sure that freed up elements are reused, we wrap the index value 
+modulo the memory block size. The entire procedure is illustrated in the 
+figure below:
+
+![Schematic showing a thread safe memory array at 
+work](/assets/images/threadsafevector.png)
+
+# Partially filled buffers
+
+A last important aspect of the task based MCRT algorithm is dealing with 
+partially filled photon packet buffers. The size of a photon packet 
+buffer is clearly quite arbitrary (I found that a value of 200 works 
+well, but I do not have a good explanation for this particular value) 
+and there is absolutely no guarantee that a buffer will ever end up 
+being completely full, especially for subgrids that are far away from 
+sources and near the end of the photon packet propagation step. If 
+photon buffers were only propagated when they are full, then a lot of 
+photon packets would end up not being propagated, which would invalidate 
+the Monte Carlo technique. Or the algorithm would deadlock because it 
+would never be able to process the partially filled buffers.
+
+The solution is to prematurely schedule partially filled photon buffers 
+in a smart way. In the current implementation, each thread first tries 
+to obtain free tasks from its own task queue and execute those. If this 
+fails, the thread will try to steal a task from another queue. If this 
+fails too, it will try to get a task from a shared queue, which contains 
+all photon source and scattering tasks. Only if this fails and the 
+thread would otherwise end up being idle will it attempt to prematurely 
+launch a partially filled photon buffer as follows. Each subgrid 
+internally keeps track of the associated photon buffer with the largest 
+number of photon packets. The idle thread starts with a reasonably high 
+target number of photon packets, and will query all subgrids for their 
+largest photon buffer size. Whenever it finds a subgrid whose largest 
+photon buffer exceeds the target number, it will try to lock the subgrid 
+and schedule the corresponding task for that photon buffer. If it fails 
+to find a matching subgrid, it will reduce the target number and repeat 
+the procedure, until a photon buffer has been scheduled.
+
+Note that this premature scheduling routine is very sensitive to 
+deadlocks and thread conflicts, as it is mainly active near the end of 
+the photon propagation step, when most threads are idle and are 
+desperately looking for work, like a hungry pack of hyenas looking for 
+food. This means that proper locks should be used whenever required, but 
+also that locks should be released as soon as possible, so that threads 
+suffer as little as possible from concurrency bottlenecks. In other 
+words, it is safe to assume that any work that shows up at this stage 
+will be executed almost immediately, and likely by another thread than 
+the one that schedules it.
+
+# Final remarks
+
+The above gives a pretty good overview of the basic building blocks of 
+the new task based MCRT algorithm I have developed. A few details were 
+missing:
+ * I mentioned before that a dedicated stopping condition is required to 
+determine when the photon propagation step is finished, as we cannot 
+simply rely on all queues being empty. The appropriate condition in this 
+case is that all photon packets that were generated were either 
+definitively absorbed or have left the simulation box. This can be 
+checked by updating an atomic counter variable for processed photon 
+packets. Whenever a thread thinks it is finished (it is idle and is 
+unable to prematurely schedule photon buffers), it checks this variable 
+against the target number of photon packets; when both values match, the 
+thread is finished. To make this compatible with a distributed memory 
+version of the algorithm, where the atomic counter needs to be 
+synchronised, I additionally check that total number of partially filled 
+photon buffers is zero, as this can tell whether or not the local node 
+is finished. Only when the node is finished do we perform a more 
+expensive synchronisation of the atomic counter across all nodes.
+ * The memory spaces for the tasks and photon buffers need to be set at 
+the start of the simulation. Clearly, a sufficiently large size is 
+required for the algorithm to work. At the same time, we do not want to 
+use a size that is much larger than what is strictly necessary to save 
+memory. Although I have not yet done a proper analysis of the numbers, I 
+discovered that the number of active photon buffers correlates with the 
+number of threads used and the grid size. This number is a lot lower 
+than the worst expected scenario (27 active buffers per subgrid). This 
+means that relatively few photon packets are actively being propagated 
+simultaneously. Note that this is depends strongly on the order in which 
+tasks are retrieved from the various queues. Queue sizes can be 
+variable, although I obtained good results with fixed queue sizes and 
+relatively small queues for the individual thread (100 tasks per thread 
+queue).
+
+There are of course much more subtleties that I either forgot about, or 
+that are just too technical for this post. It is not unlikely that I 
+will discuss some of these in the future.
