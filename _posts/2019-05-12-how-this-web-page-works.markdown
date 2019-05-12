@@ -1,0 +1,188 @@
+---
+layout: post
+title: "How this web page works"
+description: A short overview of how this blog system works.
+date: 2019-05-12
+author: Bert Vandenbroucke
+tags: 
+  - Web development
+  - Tools
+---
+
+The end of yet another busy week, so this week's post will also be 
+short. I will give a brief overview of how I experienced web development 
+over the last two decades and outline how this particular web page 
+works.
+
+# A brief history of web development
+
+When the world wide web first started being used on large scales, people 
+that wanted to provide content and people that wanted to view content 
+decided on a general standard for encoding and displaying web pages. 
+This standard is called *HyperText Markup Language* (HTML) and was first 
+introduced in 1993. It has evolved quite a bit since then, but is still 
+in use. So every web application, no matter how complicated its inner 
+workings, will generate web pages using HTML and every browser, whether 
+it is running on a computer, phone or tablet, will know how to interpret 
+this HTML. In principle that is; everyone that ever got involved with 
+serious web development will know that HTML support is not as uniform 
+across different browsers as it should be.
+
+At first, HTML was used to generate the entire web page, including all 
+colours, fonts and layouts. However, it became clear very quickly that 
+this posed an unwanted overhead: many pages can share the same styling 
+and only differ in content, and adding all the markup code for the 
+styling to each and every one of them makes these pages unnecessarily 
+heavy. On top of that, if the styling would be hard-coded in every page, 
+it becomes very hard to change the style without having to edit every 
+single page. The community therefore decided to explicitly separate 
+*content* and *styling*: HTMl would be primarily used to contain the 
+structure of the web page and the content that changes between pages, 
+the styling would now be done using a new styling language, called 
+*Cascading Style Sheets* (CSS). This paradigm still stands: a modern web 
+page will usually consist of many HTML pages containing content, and one 
+(or a few) CSS style sheets that encode the web page style. A well 
+designed web page can change its outlook completely by simply changing 
+the style sheet, without requiring any changes to the HTML. Real web 
+pages often still contain some hard-coded styling within the HTML, 
+despite this now being considered bad practice.
+
+Both HTML and CSS deal with *static* web pages, i.e. web pages that 
+require no user interaction and do not change over time. This is 
+obviously not the only type of web page used nowadays. If you e.g. click 
+the *Contact* button in the top right corner of this page, a popup will 
+appear that allows you to submit a message to my email. If you then 
+close the popup by clicking the cross in the top right corner, the popup 
+disappears again. All this interactivity needs to be *scripted*, i.e. 
+requires a set of programming commands that tell the browser how to 
+behave when specific actions are executed by the user that is viewing 
+the web page. The standard that was developed for this is called 
+*Javascript*. It was loosely based on the *Java* programming language, 
+but is not really related to it. While Javascript allows for the 
+creation of very complex interactions, it is ultimately the browser that 
+performs all the tasks and that is why we call it a scripting rather 
+than a programming language. As with the styling, a set of web pages 
+usually contains a single Javascript engine that is shared among the 
+various pages and that can be edited separately.
+
+The triad HTML, CSS and Javascript forms the backbone of all modern web 
+pages. Other content like videos, images and audio is much less 
+standardised, and older technologies like web applets are generally no 
+longer used. This means that any web page you visit nowadays will 
+somehow be using HTML, CSS and Javascript to generate whatever you see 
+and interact with. The real technology is contained in how these web 
+pages are generated before they are presented to you.
+
+# Servers and clients
+
+The first HTML pages were simple text documents that contained an entire 
+web page. When a user tried to access them through their browser, the 
+browser had to simply request that page from the *server* where it was 
+stored and then load it. The server simply stored all the pages on its 
+file system, and its only task was to reply to page requests.
+
+When web pages grew in complexity, it became apparent that this way of 
+serving web pages is not ideal. Many web pages contain a lot of content 
+that is static (i.e. does not change from one page to another), like 
+navigation links, copyright banners... and relatively little content 
+that actually changes. Storing all static content for every single page 
+causes a lot of overhead. Things got even worse when people started 
+using web pages where content is generated by web page users, like 
+online forums or social networks. These web pages use a single layout to 
+contain a large amount of different content and in the case of social 
+networks, this content even depends on the user that is accessing the 
+web page.
+
+To deal with this changing demand, the role of the server was 
+reevaluated. From the browser point of view, it makes very little 
+difference whether the server replies to a page request by just loading 
+a file from its hard disk and sending it to the client that requested 
+the page, or by generating a new page on the fly based on the contents 
+of different files on its hard desk. In other words, the client browser 
+does not care whether the file it requests actually exists when it 
+requests it, as long as the server replies by providing an actual file. 
+From the server point of view, there is clearly a significant difference 
+between these two actions, as one is more straightforward than the 
+other. However, since the main time cost of a web page request (i.e. how 
+long it takes for the client to receive a page after it sent a request 
+to the server) depends mostly on the network speed (which is relatively 
+slow), both ways are generally equally efficient. Instead of a simple 
+file sending program, we can hence run a file generating program on the 
+server and generate files as they are requested, possibly based on the 
+details of the person that requested them.
+
+So while the end result is still HTML, CSS and Javascript, many web 
+pages nowadays run server-side software that actually generates the HTML 
+(and sometimes CSS and Javascript) whenever a page is requested. The 
+actual content of the web page can then be stored in much more efficient 
+ways, e.g. in a database. Many web pages from the 2000s were written 
+using a combination of PHP (a server-side scripting language) and MySQL 
+(a server-side database). I know this because I have some personal 
+experience with this. Later, developers started using more complex 
+client-server interactions like AJAX, whereby client-side Javascript 
+sends interactive requests to the server-side software to provide fully 
+interactive web pages. I am not sure, but I think this is still how 
+large social networks like Facebook work.
+
+The success of server-side web pages comes with a downside: as these 
+server-side applications get more and more complex, the load on the 
+servers becomes very high. Furthermore, the use of server-side databases 
+makes web pages very complex and hard to maintain without access to the 
+server. In other words, server-side applications are good when you have 
+your own server and a lot of resources behind that server. They are not 
+ideal for small web pages, especially when those web pages don't really 
+require the power of a server-side application.
+
+That is why a new paradigm developed over the last few years. I'm not 
+entirely sure about the timing here; when I was into web development 
+around 2010 server-side application where definitely still a thing, but 
+when I checked again about 3 years ago this new paradigm had clearly 
+started. The new paradigm reduces the load on the server again and moves 
+the CPU intensive part of the web page back to the client by a more 
+extensive use of Javascript. The overhead of static elements that are 
+shared between pages is no longer seen as a real issue: this overhead is 
+heavily reduced by compressing the relevant HTML (and CSS and 
+Javascript) and is acceptable on the server-side, where data storage is 
+cheap and processing power is expensive.
+
+Many small, mainly static web pages (like blog systems) are now 
+typically generated by a *static generator*, for example Jekyll. The 
+generator works a bit like the server-side scripting engines like PHP 
+and combines elements from different locations into the final HTML 
+pages. These final HTML pages (and CSS and Javascript) are then copied 
+onto a server from where they are served like in the old days. The real 
+power comes from the integration of these static generators within 
+existing repository systems like GitHub. The *source code* for the 
+static web pages (written in Jekyll) is stored in a git repository, and 
+whenever this repository is updated, a web-based static generator is 
+invoked and transforms the source code into the actual web pages that 
+are then moved to the server from which they are accessible. GitHub 
+automatically creates such a web page for all of its projects, see 
+[GitHub pages](https://pages.github.com/)
+
+Static web pages sometimes need interactivity similar to that of 
+AJAX-based systems. To support these, lots of web-based services are 
+available that provide very specific low-level functionality, like 
+handling form submissions or providing comments sections to embed within 
+a blog system. A web page is hence more and more a puzzle made up of 
+many dedicated building blocks.
+
+# This web page
+
+This blog system is written in Jekyll, and is hence stored in a [GitHub 
+repository](https://github.com/bwvdnbro/bwvdnbro.github.io/tree/development) 
+as a number of layout files and a large number of posts, written in 
+MarkDown, that only contain blog content.
+
+Whenever I finish a post, I simply add the post file to the repository 
+and push to the remote repository. This triggers a webhook that connects 
+to [netlify](https://www.netlify.com/). The web service running there 
+fetches the latest version of the repository, runs the static generator 
+on it, and then stores the resulting web page on the netlify server 
+system, from where it is then visible as 
+[bertvandenbroucke.netlify.com](https://bertvandenbroucke.netlify.com/).
+
+So for me, writing a blog post is now as easy as writing a text file (in 
+my favourite text editor: nano), adding that text file to a git 
+repository, and doing the same git magic I do every day for my software 
+development. Everything else happens completely automatically.
