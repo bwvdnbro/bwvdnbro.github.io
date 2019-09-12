@@ -2,7 +2,7 @@
 layout: post
 title: "Numerically inverting a matrix"
 description: A summary of some things I learned this week.
-date: 2019-09-11
+date: 2019-09-12
 author: Bert Vandenbroucke
 tags: 
   - Code development
@@ -50,7 +50,7 @@ not very stable against round off error; if the matrix contains elements
 with significantly different sizes, then accumulated round off error can 
 lead to a significant loss of accuracy, or to numerical issues that 
 cause the inversion algorithm to fail altogether, even if the matrix is 
-stricly speaking invertible.
+strictly speaking invertible.
 
 Fortunately, there is an elegant matrix inversion algorithm that does 
 not suffer from these issues, and that furthermore can almost be 
@@ -148,17 +148,18 @@ However, an even more practical algorithm to compute the inverse is
 given by rewriting the above equations as
 
 $$
-\left( P \times{} A \right)^{-1} \times{} L = U^{-1},
+\left( P^{-1} \times{} A \right)^{-1} \times{} L = U^{-1},
 $$
 
-and solving for $$\left( P \times{} A \right)^{-1}$$. This algorithm is 
-better, as it avoids having to compute the inverse of $$L$$, and also 
-avoids the need to store intermediate matrices. Once you have computed 
-$$\left( P \times{} A \right)^{-1}$$, the inverse matrix can be found by 
-multiplying it with the permutation matrix, as before:
+and solving for $$\left( P^{-1} \times{} A \right)^{-1}$$. This 
+algorithm is better, as it avoids having to compute the inverse of 
+$$L$$, and also avoids the need to store intermediate matrices. Once you 
+have computed $$\left( P^{-1} \times{} A \right)^{-1}$$, the inverse 
+matrix can be found by multiplying it with the permutation matrix, as 
+before:
 
 $$
-\left( P \times{} A \right)^{-1} \times{} P^{-1} = A^{-1}.
+\left( P^{-1} \times{} A \right)^{-1} \times{} P^{-1} = A^{-1}.
 $$
 
 # A PLU inversion algorithm
@@ -235,7 +236,7 @@ $$
 $$
 </div>
 
-You can recognize the $$L$$ and $$U$$ matrices I showed before.
+You can recognise the $$L$$ and $$U$$ matrices I showed before.
 
 Inverting the upper diagonal matrix $$U$$ is reasonably straightforward. 
 First of all, it can be shown that the inverse of an upper/lower 
@@ -249,13 +250,17 @@ case $$u_{ij}$$, then we need to solve the following equation:
 <div>
 $$
 \begin{pmatrix}
-\frac{1}{U_{11}} & u_{12} & u_{13} \\
-0 & \frac{1}{U_{22}} & u_{23} \\
-0 & 0 & \frac{1}{U_{33}}
+u_{11} & u_{12} & u_{13} \\
+0 & u_{22} & u_{23} \\
+0 & 0 & u_{33}
 \end{pmatrix} \times{} \begin{pmatrix}
 U_{11} & U_{12} & U_{13} \\
 0 & U_{22} & U_{23} \\
 0 & 0 & U_{33}
+\end{pmatrix} \\= \begin{pmatrix}
+u_{11} U_{11} & u_{11} U_{12} + u_{12} U_{22} & u_{11} U_{13} + u_{12} U_{23} + u_{13} U_{33} \\
+0 & u_{22} U_{22} & u_{22} U_{23} + u_{23} U_{33} \\
+0 & 0 & u_{33} U_{33}
 \end{pmatrix} = \begin{pmatrix}
 1 & 0 & 0 \\
 0 & 1 & 0 \\
@@ -266,9 +271,7 @@ $$
 
 this is simply the definition of the inverse matrix.
 
-If you were to write out the individual elements of the matrix 
-multiplication in detail and apply the equation, then you would quickly 
-see a pattern emerge that allows you to solve for the $$u_{ij}$$ 
+You can see a pattern emerge that allows you to solve for the $$u_{ij}$$ 
 recursively, starting from the top row and working down (a so called 
 *forward substitution*). This algorithm only requires multiplication and 
 subtraction, and a single division per element that only involves the 
@@ -286,6 +289,129 @@ elements of the corresponding separate matrices (despite being stored in
 the same matrix), as long as you (a) store $$u_{ij}$$ in a temporary 
 variable during the summation, and (b) traverse the matrix from top to 
 bottom (from small to large $$i$$), and within a row from left to right 
-(from small to large $$j$$).
+(from small to large $$j$$). I will leave it up to you to check that 
+this indeed yields the same inverse matrix $$U^{-1}$$ as I showed 
+before.
 
-CONTINUE HERE
+The next step is to solve the equation $$\left(P^{-1} \times{} A 
+\right)^{-1} \times{} L = U^{-1}$$. If we denote the elements of the 
+matrix $$\left(P^{-1} \times{} A\right)^{-1}$$ with $$a_{ij}$$, the 
+elements of $$L$$ with $$L_{ij}$$, and the elements of $$U^{-1}$$ with 
+$$u_{ij}$$ as before, we get
+
+<div>
+$$
+\begin{pmatrix}
+a_{11} & a_{12} & a_{13} \\
+a_{21} & a_{22} & a_{23} \\
+a_{31} & a_{32} & a_{33}
+\end{pmatrix} \times{} \begin{pmatrix}
+1 & 0 & 0 \\
+L_{21} & 1 & 0 \\
+L_{31} & L_{32} & 1
+\end{pmatrix} \\ = \begin{pmatrix}
+a_{11} + a_{12} L_{21} + a_{13} L_{31} & a_{12} + a_{13} L_{32} & a_{13} \\
+a_{21} + a_{22} L_{21} + a_{23} L_{31} & a_{22} + a_{23} L_{32} & a_{23} \\
+a_{31} + a_{32} L_{21} + a_{33} L_{31} & a_{32} + a_{33} L_{32} & a_{33}
+\end{pmatrix} = \begin{pmatrix}
+u_{11} & u_{12} & u_{13} \\
+0 & u_{22} & u_{23} \\
+0 & 0 & u_{33}
+\end{pmatrix}
+$$
+</div>
+
+If you look carefully, you can see a clear pattern: the last column of 
+the matrix $$\left(P^{-1} \times{} A\right)^{-1}$$ simply equals the 
+last column of $$U^{-1}$$, while the other columns can be computed using 
+only values from $$L$$, $$U$$ and the columns that were already 
+computed, if we traverse the columns from right to left. Again, we can 
+use an in place algorithm, as long as we make sure to store the new 
+column in an intermediate array while it is being computed, as the 
+calculation for each element of the new column requires all elements of 
+$$L$$ for that same column, and we don't want to overwrite them before 
+we finished the column.
+
+Mathematically, this backward substitution algorithm can be expressed as 
+follows:
+
+$$
+a_{ij} = u_{ij} - \sum_{k = j+1}^N a_{ik} L_{kj}.
+$$
+
+If we were to apply this algorithm to the intermediate matrix, we would 
+end up with the same intermediate matrix I showed before, and we also 
+still have the pivot array:
+
+<div>
+$$
+\begin{pmatrix}
+\frac{1}{6} & 0 & -\frac{4}{15} & | & 3 \\
+-\frac{1}{27} & \frac{1}{9} & \frac{8}{135} & | & 2 \\
+\frac{1}{27} & -\frac{1}{9} & \frac{19}{135} & | & 3
+\end{pmatrix}
+$$
+</div>
+
+The only thing left to do is use the pivot array to rearrange the 
+columns. Since mathematically we have to use the inverse of the 
+permutation matrix, we will need to use a backwards algorithm, were we 
+start from the last column, and then swap that column with the column 
+with the index given by the last element of the pivot array, and so on:
+
+<div>
+$$
+\begin{pmatrix}
+\frac{1}{6} & 0 & -\frac{4}{15} & | & 3 \\
+-\frac{1}{27} & \frac{1}{9} & \frac{8}{135} & | & 2 \\
+\frac{1}{27} & -\frac{1}{9} & \frac{19}{135} & | & \checkmark{}
+\end{pmatrix} \rightarrow{}
+\begin{pmatrix}
+\frac{1}{6} & 0 & -\frac{4}{15} & | & 3 \\
+-\frac{1}{27} & \frac{1}{9} & \frac{8}{135} & | & \checkmark{} \\
+\frac{1}{27} & -\frac{1}{9} & \frac{19}{135} & | & \checkmark{}
+\end{pmatrix} \rightarrow{}
+\begin{pmatrix}
+-\frac{4}{15} & 0 & \frac{1}{6} & | & \checkmark{} \\
+\frac{8}{135} & \frac{1}{9} & -\frac{1}{27} & | & \checkmark{} \\
+\frac{19}{135} & -\frac{1}{9} & \frac{1}{27} & | & \checkmark{}
+\end{pmatrix}
+$$
+</div>
+
+The same inverse matrix WolframAlpha gave us before!
+
+# Why is this algorithm good?
+
+The key reason that this PLU inversion algorithm is preferable over 
+other algorithms is the low number of divisions that is involved, 
+combined with the partial pivoting. In the entire algorithm above, we 
+need to divide by only three different numbers: the diagonal elements in 
+the upper triangular matrix $$U$$. Divisions are always a bit 
+problematic for numerical algorithms, as their round off error is 
+theoretically unbound, unlike the round off error for additions, 
+subtractions and multiplications that is guaranteed to stay within some 
+limits. Every division could hence lead to a serious loss of accuracy, 
+especially if the numbers in the denominator of the division are small.
+
+In a naive matrix inversion algorithm, the number of divisions might be 
+lower, but the denominators of the divisions are fixed at the start and 
+could hence be anything. In the PLU inversion algorithm we have some 
+control over the denominators of the divisions, as the elements on the 
+diagonal of $$U$$ will depend on the permutations we perform during the 
+PLU decomposition. In other words: we can choose which numbers we want 
+to use for divisions when choosing the pivot for a row. If we choose the 
+pivot wisely (the element in the column with the highest absolute value 
+like we did), then we can significantly reduce the round off error that 
+occurs during the later inversion of the $$U$$ matrix. If this still 
+leads to significant round off error, then this can only be because the 
+matrix elements are very small, and numerical inversion would be tricky 
+with any algorithm.
+
+As already mentioned, a second advantage of the PLU inversion algorithm 
+is that it requires very little memory: almost all intermediate steps 
+can simply be stored in the matrix itself, and we only require two 
+additional arrays with the length of the 1D size of the matrix: the 
+pivot array and the temporary array required to store new columns during 
+the third step of the algorithm. This is especially important for large 
+matrices.
