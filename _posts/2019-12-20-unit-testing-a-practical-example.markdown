@@ -364,7 +364,7 @@ if (M >= 0) {
 This replaces the original return expression. That's it! We should now 
 be able to pass all unit tests: the third test that requires a negative 
 $$M$$ value, and the fourth test that is only there because there are 
-some subtleties involved with computing $$n_1 < n_2$$ coefficients 
+some subtleties involved with computing $$n_2 > n_1$$ coefficients 
 (subtleties that I dealt with in my example implementation by not really 
 dealing with them...).
 
@@ -422,7 +422,7 @@ code that can contain bugs, which usually makes debugging easier.
  3. Make sure that you test functionality in a realistic regime, i.e. 
 for realistic input values. Some problems are only triggered for large 
 values or for input values with a specific sign or specific internal 
-order (e.g. $$n_1 < n_2$$). Think about what kind of tests are possible 
+order (e.g. $$n_2 > n_1$$). Think about what kind of tests are possible 
 in these regimes; having mathematical relations like e.g. a 
 normalisation condition that needs to be satisfied is always helpful.
  4. Don't be afraid of using assertions on top of our unit tests. These 
