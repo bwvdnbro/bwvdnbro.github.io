@@ -44,7 +44,7 @@ on which one is the largest. For prolate spheroids, this will be $$b$$,
 while for oblate spheroids, $$a$$ is the largest and hence the 
 semi-major axis. The axis ratio $$d=a/b$$ is also frequently used to 
 distinguish between the two types of spheroids; $$d>1$$ is an oblate 
-spheroid and $$d<1$$ a prolate spheroid. Spheroids with $$d=1$$ have 
+spheroid and $$1>d$$ a prolate spheroid. Spheroids with $$d=1$$ have 
 $$a=b$$, in which case the whole equation reduces to that of a sphere. 
 The semi-major and semi-minor axis are in this case both equal to the 
 radius $$r$$ of that sphere.
@@ -212,7 +212,7 @@ infalling direction and the angle $$\theta{}$$. The requirement that the
 tangent lines are parallel to a line through the centre that makes an 
 angle $$\theta{}$$ with the $$y$$ axis, just means that the slopes we 
 found above should be the same as the slope of this reference line, 
-which is $$1/\tan(\theta{})$$. By equation both expressions for the 
+which is $$1/\tan(\theta{})$$. By equating both expressions for the 
 slope, we can determine the $$x$$ coordinates for which this is true; 
 these are the $$x$$ coordinates of the tangent points:
 
