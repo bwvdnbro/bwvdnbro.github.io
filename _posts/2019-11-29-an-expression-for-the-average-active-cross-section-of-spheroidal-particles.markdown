@@ -12,6 +12,11 @@ tags:
   - Geometry
 ---
 
+NOTE: the expression computed in this post is subtly wrong and [has been 
+corrected in a more recent post]({% post_url 
+2020-08-20-correction-average-active-cross-section-of-spheroidal-particles 
+%}).
+
 And now for something completely different. I recently encountered an 
 interesting geometry problem during my work on light scattering off 
 non-spherical particles, and this problem led to an interesting 
