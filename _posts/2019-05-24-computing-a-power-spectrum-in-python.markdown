@@ -28,11 +28,11 @@ tags:
 >  - a note on the maximum $$k$$ value used to set up the frequency bins
 >
 > The latter point was prompted by a question about checkerboard 
-> patterns (courtesy of Nicolas Robidoux). One would naively expect that 
-> the example script would have no problem picking up a periodic pattern 
-> where pixels oscillate between two values on the smallest possible 
-> scale. And indeed, if we replace the image in the example script with 
-> a pattern like this
+> patterns (courtesy of Nicolas Robidoux, Algolux). One would naively 
+> expect that the example script would have no problem picking up a 
+> periodic pattern where pixels oscillate between two values on the 
+> smallest possible scale. And indeed, if we replace the image in the 
+> example script with a pattern like this
 >
 > ```
 > image = np.zeros((1000,1000))
