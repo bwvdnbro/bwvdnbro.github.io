@@ -9,6 +9,80 @@ tags:
   - Scientific computing
 ---
 
+> Edit 10 March 2021
+>
+> Since originally writing this post almost two years ago, this post has 
+> attracted some attention (it seems to have been referenced in a 
+> question on StackOverflow). I have recently received a number of 
+> questions and comments on the original version of this post, which has 
+> prompted me to make some corrections and improvements to the original 
+> post. The corrections include:
+>  - the addition of some missing imports in the example script 
+>  (including replacing `import pylab as pl` with `import 
+>  matplotlib.pyplot as pl`
+>  - an import fix and additional explanation of the bin volume factor 
+>  used to normalise `Abins`
+>  - a more general treatment of the image resolution, so that the 
+>  example script can be applied to larger/smaller images as well
+>  - a note on the assumption that the average amplitude is zero
+>  - a note on the maximum $$k$$ value used to set up the frequency bins
+>
+> The latter point was prompted by a question about checkerboard 
+> patterns (courtesy of Nicolas Robidoux). One would naively expect that 
+> the example script would have no problem picking up a periodic pattern 
+> where pixels oscillate between two values on the smallest possible 
+> scale. And indeed, if we replace the image in the example script with 
+> a pattern like this
+>
+> ```
+> image = np.zeros((1000,1000))
+> image[::2,::2] = 1.
+> ```
+>
+> then the script has no problem picking up a strong peak at a frequency 
+> of 500. However, if we replace the pattern with a checkerboard that 
+> oscillates in both directions:
+>
+> ```
+> image = np.zeros((1000,1000))
+> image[::2,::2] = 1.
+> image[1::2,1::2] = 1.
+> ```
+> 
+> then the script does not work, or returns different results depending 
+> on the exact image resolution (powers of two are particularly bad) or 
+> whether or not the image mean is subtracted. Nicolas suggested 
+> extending the bin range for the $$k$$ values to $$\sqrt{2}N/2$$ (see 
+> the note in the relevant portion of the post). However, this does not 
+> necesssarily solve the issue, since the real issue here is that the 
+> oscillations in our checkboard pattern will show up in a corner of our 
+> box in $$k$$ space (the intersection of the image square and the $$k$$ 
+> value ring), meaning they are only sampled with exactly 1 pixel. Since 
+> the power spectrum computes the *variance* across pixels with the same 
+> $$k$$ value, the power spectrum for that $$k$$ value will be undefined 
+> (you cannot compute a variance for a sample of size 1).
+>
+> The only way to really address this issue would be to resample the 
+> checkerboard pattern so that each pixel in the original pattern is 
+> sampled by 4 pixels:
+>
+> ```
+> image = np.zeros((1000,1000))
+> image[::2,::2] = 1.
+> image[1::2,1::2] = 1.
+>
+> image2 = np.zeros((2000, 2000))
+> image2[::2,::2] = image
+> image2[1::2,::2] = image
+> image2[::2,1::2] = image
+> image2[1::2,1::2] = image
+>
+> image = image2
+> ```
+>
+> This correctly results in a power spectrum with a strong peak at 
+> $$k=707\approx{}500\sqrt{2}$$.
+
 A power spectrum is an analysis tool that is very often used to do a 
 statistical analysis for a large, seemingly chaotic data set. Within 
 astronomy, they are used in practically every field: the power spectrum 
@@ -147,13 +221,31 @@ values that represents the grey scale level of each pixel. You can
 visualise this list using `imshow`:
 
 ```
-import pylab as pl
+import matplotlib.pyplot as pl
 pl.imshow(image)
 pl.show()
 ```
 
 Since this function will map the pixel values to the default colour 
 scale, the result will look quite interesting.
+
+Since the pixel resolution of our image will be important for the 
+remainder of our analysis, we will store it in a dedicated variable:
+
+```
+npix = image.shape[0]
+```
+
+> The analysis will only work for a square image (so we require 
+> `image.shape[0] == image.shape[1]`).
+
+> If the input image was indeed a grey scale image, then 
+> `mpimg.imread()` should return a 2D array. Most images will instead 
+> contain RGB or RGBA pixels, so that the resulting image shape will be 
+> `(1000,1000,3)` or `(1000,1000,4)`. This does not work for the script 
+> below. There are ways to convert an RGB(A) image to a grey scale image 
+> in Python, but this can also be done with image editing software. I 
+> used GIMP to convert the example image.
 
 ## Taking the Fourier transform
 
@@ -179,6 +271,14 @@ variances. We can get these values like this
 fourier_amplitudes = np.abs(fourier_image)**2
 ```
 
+> The assumption that the average amplitude should be zero is not 
+> actually required, as the average will only contribute to the zero 
+> frequency term of the Fourier transform (the average acts as a 
+> constant term in the Fourier expansion). This zero frequency term is 
+> sampled by exactly one wave vector, so that the variance of the 
+> Fourier amplitude for this term is undefined anyway, and does not show 
+> up in the power spectrum.
+
 # Constructing a wave vector array
 
 To bin the results found above in $$k$$ space, we need to know what the 
@@ -192,7 +292,7 @@ Alternatively, we could not worry about this, and just use the utility
 function provided by `numpy`:
 
 ```
-kfreq = np.fft.fftfreq(1000) * 1000
+kfreq = np.fft.fftfreq(npix) * npix
 ```
 
 This will automatically return a one dimensional array containing the 
@@ -228,15 +328,29 @@ To bin the amplitudes in $$k$$ space, we need to set up wave number
 bins. We will create integer $$k$$ value bins, as is common:
 
 ```
-kbins = np.arange(0.5, 501., 1.)
+kbins = np.arange(0.5, npix//2+1, 1.)
 ```
 
 Note that the maximum wave number will equal half the pixel size of the 
 image. This is because half of the Fourier frequencies can be mapped 
 back to negative wave numbers that have the same norm as their positive 
-counterpart. The `kbin` array will contain the start and end points of 
-all bins; the corresponding $$k$$ values are the midpoints of these 
-bins:
+counterpart.
+
+> Technically speaking, the maximum possible $$k$$ value in 2D is 
+> $$\sqrt{2}N/2$$, where $$N$$ is the number of pixels. This is because 
+> the $$k$$ value for both $$k_x$$ and $$k_y$$ is limited to $$N/2$$, so 
+> that the square root of their quadratic sum can reach larger values. 
+> Including wave vectors with $$k>N/2$$ however poses a sampling 
+> problem: since the circle with radius $$k>N/2$$ does no longer fit 
+> entirely inside the image frame, we will be missing an increasing 
+> fraction of the $$k$$ ring, which leads to a noticeable drop in the 
+> power spectrum past $$k=N/2$$. This also means that we can only 
+> correctly sample the power spectrum up to $$k=N/2$$. Features with 
+> frequencies larger than this will not appear in the power spectrum or 
+> will have significant statistical biases.
+
+The `kbin` array will contain the start and end points of all bins; the 
+corresponding $$k$$ values are the midpoints of these bins:
 
 ```
 kvals = 0.5 * (kbins[1:] + kbins[:-1])
@@ -255,11 +369,24 @@ Abins, _, _ = stats.binned_statistic(knrm, fourier_amplitudes,
 
 Remember that we want the *total* variance within each bin. Right now, 
 we only have the average power. To get the total power, we need to 
-multiply with the volume in each bin:
+multiply with the volume in each bin (in 2D, this volume is actually a 
+*surface area*):
 
 ```
-Abins *= 4. * np.pi / 3. * (kbins[1:]**3 - kbins[:-1]**3)
+Abins *= np.pi * (kbins[1:]**2 - kbins[:-1]**2)
 ```
+
+> We compute the surface area as the difference between the surface area 
+> of two discs with respective radii $$k_u$$ and $$k_l$$, which are the 
+> $$k$$ values at the lower and the upper edge of the bin. This is a 
+> more accurate version of the commonly used surface element 
+> $$2\pi{}k{\rm{}d}k$$, since this latter formula is technically only 
+> valid for infinitesimally small $${\rm{}d}k$$.
+
+> In the original version of this post, I accidentally used the 3D 
+> surface element $$(4\pi{}/3)k^2{\rm{}d}k$$, leading to the expression 
+> `Abins *= 4. * np.pi / 3. * (kbins[1:]**3 - kbins[:-1]**3)`. As a 
+> result, the power spectrum shown in my original post was wrong.
 
 Finally, we can plot the resulting power spectrum as a function of wave 
 number, $$P(k)$$ (typically plotted on a double logarithmic scale):
@@ -289,25 +416,29 @@ order equivalent.
 ```
 import matplotlib.image as mpimg
 import numpy as np
+import scipy.stats as stats
+import matplotlib.pyplot as pl
 
 image = mpimg.imread("clouds.png")
+
+npix = image.shape[0]
 
 fourier_image = np.fft.fftn(image)
 fourier_amplitudes = np.abs(fourier_image)**2
 
-kfreq = np.fft.fftfreq(1000) * 1000
+kfreq = np.fft.fftfreq(npix) * npix
 kfreq2D = np.meshgrid(kfreq, kfreq)
 knrm = np.sqrt(kfreq2D[0]**2 + kfreq2D[1]**2)
 
 knrm = knrm.flatten()
 fourier_amplitudes = fourier_amplitudes.flatten()
 
-kbins = np.arange(0.5, 501., 1.)
+kbins = np.arange(0.5, npix//2+1, 1.)
 kvals = 0.5 * (kbins[1:] + kbins[:-1])
 Abins, _, _ = stats.binned_statistic(knrm, fourier_amplitudes,
                                      statistic = "mean",
                                      bins = kbins)
-Abins *= 4. * np.pi / 3. * (kbins[1:]**3 - kbins[:-1]**3)
+Abins *= np.pi * (kbins[1:]**2 - kbins[:-1]**2)
 
 pl.loglog(kvals, Abins)
 pl.xlabel("$k$")
